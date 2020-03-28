@@ -1,6 +1,7 @@
 # Poker
 # 2 cards in hand, possibility to exchange cards at the beginning of a game.
 import random
+from itertools import combinations  # used in hands_ranking()
 
 
 class Card:
@@ -11,18 +12,36 @@ class Card:
         self.symbol = symbol
 
     def __str__(self):
-        return "{} of {}".format(self.number, self.symbol)
+        if self.number == 11:
+            card = "{} of {}".format("Jack", self.symbol)
+        elif self.number == 12:
+            card = "{} of {}".format("Queen", self.symbol)
+        elif self.number == 13:
+            card = "{} of {}".format("King", self.symbol)
+        elif self.number == 14:
+            card = "{} of {}".format("Ace", self.symbol)
+        else:
+            card = "{} of {}".format(self.number, self.symbol)
+
+        return card
+
+    # methods used for card comparison in sorting
+    def __eq__(self, other_card):
+        return self.number == other_card.number and self.symbol == other_card.number
+
+    def __lt__(self, other_card):
+        return self.number < other_card.number
 
 
 class Deck:
     """
     Represent a deck of 52 cards.
-    Cards are numerated from 1 to 13, where:
-    1 - Ace
+    Cards are numerated from 2 to 14, where:
     2 to 10 - normal cards
     11 - Jack
     12 - Queen
     13 - King
+    14 - Ace
     """
     symbols = ["Hearts", "Spades", "Clubs", "Diamonds"]
 
@@ -36,31 +55,10 @@ class Deck:
             if i % 13 == 0:
                 next_element += 1
 
-            # add cards and replace numbers 1, 11, 12, 13 with names
-            if i % 13 + 1 == 1:
-                self.deck.append(Card("Ace", self.symbols[next_element]))
-
-            elif i % 13 + 1 == 11:
-                self.deck.append(Card("Jack", self.symbols[next_element]))
-
-            elif i % 13 + 1 == 12:
-                self.deck.append(Card("Queen", self.symbols[next_element]))
-
-            elif i % 13 + 1 == 13:
-                self.deck.append(Card("King", self.symbols[next_element]))
-
-            else:
-                self.deck.append(Card(i % 13 + 1, self.symbols[next_element]))
+            self.deck.append(Card(i % 13 + 2, self.symbols[next_element]))  # numbers from 2 to 14
 
     def shuffle(self):
-        random_list = random.sample(range(52), 52)
-
-        for i in range(52):
-            swap = self.deck[i]
-            random_element = random_list.pop()
-
-            self.deck[i] = self.deck[random_element]
-            self.deck[random_element] = swap
+        random.shuffle(self.deck)
 
     def pop(self):
         return self.deck.pop()
@@ -77,6 +75,7 @@ class Player:
         self.name = name
         self.card_1 = deck.pop()
         self.card_2 = deck.pop()
+        self.card_set = ()  # tuple with name and value of players 5 card set
 
     def __str__(self):
         return "{} has: {} AND {}\n".format(self.name, self.card_1, self.card_2)
@@ -106,6 +105,58 @@ class Player:
             print("No cards have been exchanged.")
 
 
+def hand_ranking(combination: []):
+    """Return tuple (name,value) of combination of 5 cards passed as list"""
+    combination.sort()
+
+    flush = True
+    straight = True
+    pairs = []
+
+    for i in range(len(combination)):
+        for j in range(i + 1, len(combination)):
+
+            if combination[i].symbol != combination[j].symbol:
+                flush = False
+
+            # cards are sorted, for straight check if next card - 1 is equal to previous one
+            if combination[i].number - i != combination[j].number - j:
+                straight = False
+
+            if combination[i].number == combination[j].number:
+                pairs.append(combination[i].number)
+
+    if flush and straight and combination[0].number == 10:
+        return "ROYAL FLUSH", 10
+
+    elif flush and straight:
+        return "STRAIGHT FLUSH", 9
+
+    elif len(pairs) > 4:
+        return "FOUR OF A KIND", 8
+
+    elif len(pairs) == 4:
+        return "FULL HOUSE", 7
+
+    elif flush:
+        return "FLUSH", 6
+
+    elif straight:
+        return "STRAIGHT", 5
+
+    elif len(pairs) == 3:
+        return "THREE OF A KIND", 4
+
+    elif len(pairs) == 2:
+        return "TWO PAIRS", 3
+
+    elif len(pairs) == 1:
+        return "ONE PAIR", 2
+
+    else:
+        return "HIGH CARD", 1
+
+
 class Game:
     """
     Invokes phases of game:
@@ -116,43 +167,97 @@ class Game:
     5.Cards showdown, player with best 5-card set wins.
     """
 
-    def __init__(self, deck, player_1, player_2):
+    def __init__(self, deck, players):
         self.deck = deck
-        self.player_1 = player_1
-        self.player_2 = player_2
+        self.table = []  # list of cards on table
+        self.players = players
 
     def exchange(self):
-        self.player_1.exchange()
-        self.player_2.exchange()
+        for player in self.players:
+            player.exchange()
+
+    def hands_combinations(self):
+        """
+        Check all 5 elements combinations of players cards and cards on table
+        and set each players card_set tuple to the best combination they have.
+        """
+        for i in range(len(self.players)):
+            cards = []
+            cards.extend(self.table)
+            cards.append(self.players[i].card_1)
+            cards.append(self.players[i].card_2)
+
+            comb_list = list(combinations(cards, 5))
+
+            best_value = 0
+
+            for j in range(len(comb_list)):
+                combination = hand_ranking(list(comb_list[j]))
+
+                if combination[1] > best_value:
+                    self.players[i].card_set = combination
+                    best_value = combination[1]
+
+    def print_players(self):
+        for player in self.players:
+            print(player)
+
+    def print_table(self):
+        for i in self.table:
+            print(self.table[self.table.index(i)])
 
     def flop(self):
         print("------------------Flop------------------")
         for i in range(1, 4):
-            print("{}. {}".format(i, self.deck.pop()))
+            card = self.deck.pop()
+            self.table.append(card)
+            print("{}. {}".format(i, card))
 
     def turn(self):
         print("------------------Turn------------------")
-        print("{}. {}".format(4, self.deck.pop()))
+        card = self.deck.pop()
+        self.table.append(card)
+        print("{}. {}".format(4, card))
 
     def river(self):
         print("------------------River------------------")
-        print("{}. {}".format(5, self.deck.pop()))
+        card = self.deck.pop()
+        self.table.append(card)
+        print("{}. {}".format(5, card))
+
+    def result(self):
+        winner = self.players[0]
+        count = 0
+
+        for player in self.players:
+            print("Player {} has {} with value of {}".format(player.name, player.card_set[0], player.card_set[1]))
+            if player.card_set[1] > winner.card_set[1]:
+                winner = player
+                count = 0
+            elif player.card_set[1] == winner.card_set[1]:
+                count += 1
+
+        if count == len(self.players):
+            print("Draw!")
+        else:
+            print("{} wins the pot!".format(winner.name))
 
 
 deck = Deck()
 deck.generate()
 deck.shuffle()
+# deck.print()
 
-game = Game(deck, Player("Alex", deck), Player("Computer", deck))
+alex = Player("Alex", deck)
+computer = Player("Computer", deck)
 
-print(game.player_1)
-print(game.player_2)
+game = Game(deck, [alex, computer])
 
+game.print_players()
 game.exchange()
-
-print(game.player_1)
-print(game.player_2)
-
 game.flop()
 game.turn()
 game.river()
+game.hands_combinations()
+game.print_players()
+game.result()
