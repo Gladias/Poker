@@ -2,6 +2,8 @@
 # 2 cards in hand, possibility to exchange cards at the beginning of a game.
 import random
 from itertools import combinations  # used in hands_ranking()
+import pygame
+import sys
 
 
 class Card:
@@ -80,7 +82,7 @@ class Player:
     def __str__(self):
         return "{} has: {} AND {}\n".format(self.name, self.card_1, self.card_2)
 
-    def exchange(self):
+    def exchange(self, deck):
         print("{} how many cards would you like to exchange: ".format(self.name))
         number = int(input())
 
@@ -172,9 +174,9 @@ class Game:
         self.table = []  # list of cards on table
         self.players = players
 
-    def exchange(self):
+    def exchange(self, deck):
         for player in self.players:
-            player.exchange()
+            player.exchange(deck)
 
     def hands_combinations(self):
         """
@@ -243,21 +245,46 @@ class Game:
             print("{} wins the pot!".format(winner.name))
 
 
-deck = Deck()
-deck.generate()
-deck.shuffle()
-# deck.print()
+def display_game():
+    pygame.init()
+    screen = pygame.display.set_mode((1181, 695))
+    clock = pygame.time.Clock()
+    bg = pygame.image.load("assets/table.png")
+    card = pygame.image.load('assets/2C.png')
 
-alex = Player("Alex", deck)
-computer = Player("Computer", deck)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
 
-game = Game(deck, [alex, computer])
+        screen.blit(bg, (0, 0))
+        screen.blit(card, (464, 510))
+        pygame.display.flip()
+        clock.tick(30)
 
-game.print_players()
-game.exchange()
-game.flop()
-game.turn()
-game.river()
-game.hands_combinations()
-game.print_players()
-game.result()
+
+def main():
+    display_game()
+    print("xd")
+    deck = Deck()
+    deck.generate()
+    deck.shuffle()
+    # deck.print()
+
+    alex = Player("Alex", deck)
+    computer = Player("Computer", deck)
+
+    game = Game(deck, [alex, computer])
+
+    game.print_players()
+    game.exchange(deck)
+    game.flop()
+    game.turn()
+    game.river()
+    game.hands_combinations()
+    game.print_players()
+    game.result()
+
+
+if __name__ == '__main__':
+    main()
