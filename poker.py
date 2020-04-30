@@ -99,15 +99,16 @@ class Deck:
 class Player:
     """Represent a hand of 2 cards"""
 
-    def __init__(self, name, deck, AI):
+    def __init__(self, name, deck, money, AI):
         self.name = name
         self.card_1 = deck.pop()
         self.card_2 = deck.pop()
+        self.money = money
         self.is_AI_controlled = AI
         self.card_set = ()  # tuple with name and value of players 5 card set
 
     def __str__(self):
-        return "{} has: {} AND {}\n".format(self.name, self.card_1, self.card_2)
+        return "{} your cards are {} AND {}, your bankroll is {}$".format(self.name, self.card_1, self.card_2, self.money)
 
     def exchange(self, deck):
         """Exchange function for not AI controlled players"""
@@ -138,7 +139,7 @@ class Player:
     def exchange_simulation(self, deck):
         """Decide which cards to exchange in AI controlled players"""
         t_start = default_timer()
-        N = 5000
+        N = 2000
         # Number of simulations per case, there are 4 cases because player can do 1 action from 4 available:
         # 1. Don't exchange cards
         # 2. Replace first card
@@ -253,6 +254,9 @@ class Player:
         t_end = default_timer()
         print("|{} made a decision in {:.2f}s|".format(self.name, t_end-t_start))
 
+    def bet_simulation(self, deck):
+        pass
+
 
 def hand_ranking(combination: []):
     """Return tuple (name,value) of combination of 5 cards passed as list"""
@@ -332,7 +336,7 @@ def hands_combinations(table, player):
 
 class Game:
     """
-    Invokes phases of game:
+    Invokes stages of game:
     1.Exchange of cards
     2.Flop - 3 cards from deck are shown to all players
     3.Turn - 1 card -||-
@@ -343,12 +347,15 @@ class Game:
     def __init__(self, deck, players):
         self.deck = deck
         self.table = []  # list of cards on table
+        self.round_pot = 0
+        self.game_pot = 0
         self.players = players
 
-    def exchange(self, deck, game):
+    def exchange(self, deck):
         for player in self.players:
             if player.is_AI_controlled:
                 player.exchange_simulation(deck)
+
             else:
                 player.exchange(deck)
 
@@ -364,41 +371,70 @@ class Game:
         for i in self.table:
             print(self.table[self.table.index(i)])
 
+    def bet(self, deck):
+        self.round_pot = 0
+
+        for player in self.players:
+            if player.is_AI_controlled:
+                player.bet_simulation(deck)
+
+            else:
+                print(player)
+                print("{} enter bet size:".format(player.name))
+                bet_size = int(input())
+
+                if 0 < bet_size < player.money:
+                    player.money -= bet_size
+                    self.round_pot += bet_size
+                    self.game_pot += bet_size
+
+                    print("| ROUND POT IS {}$ |".format(self.round_pot))
+
+                else:
+                    print("Invalid value!")
+
     def flop(self):
-        print("------------------Flop------------------")
+        print("-----Flop-----Game pot = {}$-----".format(self.game_pot))
         for i in range(1, 4):
             card = self.deck.pop()
             self.table.append(card)
             print("{}. {}".format(i, card))
 
     def turn(self):
-        print("------------------Turn------------------")
+        print("-----Turn-----Game pot = {}$-----".format(self.game_pot))
         card = self.deck.pop()
         self.table.append(card)
         print("{}. {}".format(4, card))
 
     def river(self):
-        print("------------------River------------------")
+        print("-----River-----Game pot = {}$-----".format(self.game_pot))
         card = self.deck.pop()
         self.table.append(card)
         print("{}. {}".format(5, card))
 
     def result(self):
         winner = self.players[0]
-        count = 0
+        winners_list = []  # draw case
 
         for player in self.players:
             print("Player {} has {} with value of {}".format(player.name, player.card_set[0], player.card_set[1]))
+
             if player.card_set[1] > winner.card_set[1]:
                 winner = player
-                count = 0
-            elif player.card_set[1] == winner.card_set[1]:
-                count += 1
+                winners_list = []
 
-        if count == len(self.players):
-            print("Draw!")
+            elif player.card_set[1] == winner.card_set[1]:
+                winners_list.append(player)
+
+        if len(winners_list) > 1:
+            print("Draw, {}$ split between {} players".format(self.game_pot, len(winners_list)))
+
+            split = round(self.game_pot / len(winners_list), 2)
+            for player in winners_list:
+                print("{} wins {}$".format(player.name, split))
+
         else:
-            print("{} wins the pot!".format(winner.name))
+            print("{} wins {}$".format(winner.name, self.game_pot))
 
 
 """
@@ -426,19 +462,26 @@ def main():
     deck.generate()
     deck.shuffle()
 
-    alex = Player(name="Alex", deck=deck, AI=False)
-    bot_1 = Player(name="Bot_1", deck=deck, AI=True)
-    bot_2 = Player(name="Bot_2", deck=deck, AI=True)
+    alex = Player(name="Alex", deck=deck, money=1000, AI=False)
+    john = Player(name="John", deck=deck, money=1000, AI=False)
+    bot_1 = Player(name="Bot_1", deck=deck, money=1000, AI=True)
+    bot_2 = Player(name="Bot_2", deck=deck, money=1000, AI=True)
 
-    game = Game(deck, [alex, bot_1, bot_2])
+    game = Game(deck, [alex, john, bot_1, bot_2])
 
     game.print_players()
-    game.exchange(deck, game)
+    game.exchange(deck)
 
+    game.bet(deck)
     game.flop()
+
+    game.bet(deck)
     game.turn()
+
+    game.bet(deck)
     game.river()
 
+    game.bet(deck)
     game.check_sets()
     game.result()
 
