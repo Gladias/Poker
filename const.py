@@ -15,6 +15,8 @@ sets_and_values = [
 
 ASSETS = Path("assets/")
 
+FONT_SIZE = 20
+
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 

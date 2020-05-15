@@ -9,15 +9,17 @@ from hand_evaluation import hands_combinations
 class Player:
     """Represent a hand of 2 cards"""
 
-    def __init__(self, name, deck, money, AI):
+    def __init__(self, name, deck, money, AI, image_path=None):
         self.name = name
         self.card_1 = deck.pop()
         self.card_2 = deck.pop()
         self.money = money
         self.is_AI_controlled = AI
+        # ToDo: self.image_path = image_path
         self.card_set = ()  # tuple with name and value of players 5 card set
 
     def __str__(self):
+        #print_card()
         return "{} your cards are {} AND {}, your bankroll is {}$".format(self.name, self.card_1, self.card_2, self.money)
 
     def exchange(self, deck):

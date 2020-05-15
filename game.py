@@ -1,4 +1,21 @@
+import sys
+
+import pygame
+
+import deck
 from hand_evaluation import hands_combinations
+from player import Player
+from const import ASSETS, WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE, SECOND_HAND_CARD_X, FIRST_HAND_CARD_X, HAND_CARDS_Y
+
+
+def print_message(text, screen, game_font, x=300, y=300):
+    text_surface = game_font.render(text, False, (0, 0, 0))
+    screen.blit(text_surface, (0,0))
+
+
+def print_card(screen, image_path, x, y):
+    card = pygame.image.load(image_path).convert_alpha()
+    screen.blit(card, (x, y))
 
 
 class Game:
@@ -15,12 +32,14 @@ class Game:
     9.Cards showdown, player with best 5-card set wins.
     """
 
-    def __init__(self, deck, players):
+    def __init__(self, deck, players, screen, game_font):
         self.deck = deck
         self.table = []  # list of cards on table
         self.round_pot = 0
         self.game_pot = 0
         self.players = players
+        self.screen = screen
+        self.game_font = game_font
 
     def exchange(self, deck):
         for player in self.players:
@@ -34,9 +53,12 @@ class Game:
         for i in range(len(self.players)):
             hands_combinations(self.table, self.players[i])
 
-    def print_players(self):
+    def print_player(self):
         for player in self.players:
-            print(player)
+            if player.is_AI_controlled:
+                print_card(self.screen, player.card_1.image_path, FIRST_HAND_CARD_X, HAND_CARDS_Y)
+                print_card(self.screen, player.card_2.image_path, SECOND_HAND_CARD_X, HAND_CARDS_Y)
+
 
     def print_table(self):
         for i in self.table:
@@ -106,3 +128,38 @@ class Game:
 
         else:
             print("{} wins {}$".format(winner.name, self.game_pot))
+
+    def run(self):
+        # Window init
+        icon = pygame.image.load(str(ASSETS / "icon.png"))
+        pygame.display.set_icon(icon)
+        pygame.display.set_caption("Poker")
+
+        background = pygame.image.load(str(ASSETS / "table.png")).convert()
+
+        while True:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    sys.exit()
+
+            self.screen.blit(background, (0, 0))
+            self.print_player()
+
+            pygame.display.flip()
+
+        """
+        self.exchange(deck)
+
+        self.bet(deck)
+        self.flop()
+
+        self.bet(deck)
+        self.turn()
+
+        self.bet(deck)
+        self.river()
+
+        self.bet(deck)
+        self.check_sets()
+        self.result()
+        """

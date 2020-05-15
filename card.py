@@ -14,7 +14,7 @@ class Card(pygame.sprite.Sprite):
         self.number = number
         self.symbol = symbol
         self.image_path = image_path
-        # RECT
+        # Todo: RECT
 
     def __str__(self):
         if self.number == 11:
