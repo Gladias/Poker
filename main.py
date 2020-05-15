@@ -1,31 +1,13 @@
 # Poker
 # 2 cards in hand, possibility to exchange cards at the beginning of a game.
-
 from deck import Deck
+from display import display_game
 from game import Game
 from player import Player
 
-"""
-def display_game():
-    pygame.init()
-    screen = pygame.display.set_mode((1181, 695))
-    clock = pygame.time.Clock()
-    bg = pygame.image.load("assets/table.png")
-    card = pygame.image.load('assets/2C.png')
-
-    while True:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-
-        screen.blit(bg, (0, 0))
-        screen.blit(card, (464, 510))
-        pygame.display.flip()
-        clock.tick(30)
-"""
-
 
 def main():
+    display_game()
     deck = Deck()
     deck.generate()
     deck.shuffle()

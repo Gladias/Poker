@@ -1,5 +1,7 @@
 from random import shuffle
+
 from card import Card
+from const import ASSETS
 
 
 class Deck:
@@ -31,7 +33,9 @@ class Deck:
             if i % 13 == 0:
                 next_element += 1
 
-            self.deck.append(Card(i % 13 + 2, self.symbols[next_element]))  # numbers from 2 to 14
+            n = i % 13 + 2  # numbers from 2 to 14
+            image_path = ASSETS / "cards" / "{}{}.png".format(n, self.symbols[next_element][0])
+            self.deck.append(Card(n, self.symbols[next_element], str(image_path)))
 
     def shuffle(self):
         shuffle(self.deck)

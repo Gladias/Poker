@@ -1,9 +1,20 @@
-class Card:
-    """Represent a single card."""
+import pygame
 
-    def __init__(self, number, symbol):
+from const import CARD_WIDTH, CARD_HEIGHT
+
+
+class Card(pygame.sprite.Sprite):
+    """Represent a single card."""
+    width = CARD_WIDTH
+    height = CARD_HEIGHT
+
+    def __init__(self, number, symbol, image_path):
+        super().__init__()
+
         self.number = number
         self.symbol = symbol
+        self.image_path = image_path
+        # RECT
 
     def __str__(self):
         if self.number == 11:
