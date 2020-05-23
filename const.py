@@ -17,7 +17,13 @@ sets_and_values = [
 
 ASSETS = Path("assets/")
 
+# Colors
+ORANGE = (248, 152, 56)
+BLACK = (0, 0, 0)
+
 FONT_SIZE = 20
+
+BORDER_SIZE = 5
 
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720

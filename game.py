@@ -4,8 +4,9 @@ import pygame
 
 import deck
 from hand_evaluation import hands_combinations
-from const import ASSETS, WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE, SECOND_HAND_CARD_X, FIRST_HAND_CARD_X, HAND_CARDS_Y
-from interface import Button
+from const import ASSETS, WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE, SECOND_HAND_CARD_X, FIRST_HAND_CARD_X, HAND_CARDS_Y, \
+    BORDER_SIZE
+from interface import Button, prepare_interface, prepare_message
 
 
 class Game:
@@ -153,9 +154,12 @@ class Game:
                 pygame.display.flip()
 
                 if stage == "bet":
-                    pass
+                    if len(button_list) == 0:
+                        button_list.extend(prepare_interface(font))
                     #self.bet(self.deck)
-                    #stage = next(self.stages)
+
+                    #for bot in self.bots:
+                    #    bot.bet_simulation()
 
                 elif stage == "exchange":
                     message = prepare_message(font, "{} click on cards you would like to replace".format(self.player.name))
@@ -184,6 +188,13 @@ class Game:
                             button_list.pop()
                             message = prepare_message(font, "")
                             self.player.adjust_cards_position()
+
+                            # Run exchange simulation for bots
+                            # TODO: Threads maybe
+                            # TODO: UNCOMMENT
+                            #for bot in self.bots:
+                            #   bot.exchange_simulation(self.deck)
+
                             stage = next(self.stages)
 
                 elif stage == "flop":
@@ -205,8 +216,9 @@ class Game:
                 #    self.screen.blit(card.image, card.rect)
 
                 for button in button_list:
-                    pygame.draw.rect(self.screen, button.bg_color, button.rect)
-                    self.screen.blit(button.caption, (button.rect.x, button.rect.y))
+                    pygame.draw.rect(self.screen, button.border_color, button.border_rect, border_radius=BORDER_SIZE)
+                    pygame.draw.rect(self.screen, button.bg_color, button.rect, border_radius=BORDER_SIZE)
+                    self.screen.blit(button.caption, button.text_rect)
 
                 self.screen.blit(self.player.card_1.image, self.player.card_1.rect)
                 self.screen.blit(self.player.card_2.image, self.player.card_2.rect)
@@ -217,6 +229,3 @@ class Game:
 
                 pygame.display.flip()
 
-
-def prepare_message(font, text, x=300, y=300):
-    return font.render(text, True, (0, 0, 0))
