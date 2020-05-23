@@ -5,7 +5,7 @@ import pygame
 import deck
 from hand_evaluation import hands_combinations
 from const import ASSETS, WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE, SECOND_HAND_CARD_X, FIRST_HAND_CARD_X, HAND_CARDS_Y, \
-    BORDER_SIZE
+    BORDER_SIZE, TABLE_CARD_1_X, TABLE_CARDS_Y, TABLE_CARDS_OFFSET, CARD_WIDTH
 from interface import Button, prepare_message, prepare_buttons, prepare_text
 
 
@@ -81,24 +81,37 @@ class Game:
                 else:
                     print("Invalid value!")
 
-    def flop(self):
-        print("-----Flop-----Game pot = {}$-----".format(self.game_pot))
-        for i in range(1, 4):
+    def flop(self, card_list):
+        # Run function only once
+        if len(card_list) == 2:
+            for i in range(3):
+                card = self.deck.pop()
+                card.downscale()
+
+                card.set_position(TABLE_CARD_1_X + (card.rect.width + TABLE_CARDS_OFFSET)*i, TABLE_CARDS_Y)
+
+                card_list.append(card)
+                self.table.append(card)
+
+    def turn(self, card_list):
+        if len(card_list) == 5:
             card = self.deck.pop()
+            card.downscale()
+
+            card.set_position(TABLE_CARD_1_X + (card.rect.width + TABLE_CARDS_OFFSET)*3, TABLE_CARDS_Y)
+
+            card_list.append(card)
             self.table.append(card)
-            print("{}. {}".format(i, card))
 
-    def turn(self):
-        print("-----Turn-----Game pot = {}$-----".format(self.game_pot))
-        card = self.deck.pop()
-        self.table.append(card)
-        print("{}. {}".format(4, card))
+    def river(self, card_list):
+        if len(card_list) == 6:
+            card = self.deck.pop()
+            card.downscale()
 
-    def river(self):
-        print("-----River-----Game pot = {}$-----".format(self.game_pot))
-        card = self.deck.pop()
-        self.table.append(card)
-        print("{}. {}".format(5, card))
+            card.set_position(TABLE_CARD_1_X + (card.rect.width + TABLE_CARDS_OFFSET)*4, TABLE_CARDS_Y)
+
+            card_list.append(card)
+            self.table.append(card)
 
     def result(self):
         winner = self.players[0]
@@ -139,7 +152,7 @@ class Game:
         # List of objects to render, obj.image and obj.rect is required
         card_list = [self.player.card_1, self.player.card_2]
         button_list = prepare_buttons(font)
-        text_list = prepare_text(self.player.name, self.player.money, self.round_pot, self.game_pot, font)
+        text_list = prepare_text(self.player.name, self.player.money, self.round_pot, self.game_pot, self.bots, font)
 
         self.screen.blit(background, (0, 0))
 
@@ -168,7 +181,7 @@ class Game:
                 #pygame.display.flip()
 
                 if stage == "bet":
-                    pass
+                    stage = next(self.stages)
 
                     #print(pygame.event.event_name(event.type))
 
@@ -217,16 +230,16 @@ class Game:
                             stage = next(self.stages)
 
                 elif stage == "flop":
-                    self.flop()
+                    self.flop(card_list)
                     stage = next(self.stages)
 
                 elif stage == "turn":
-                    self.turn()
+                    self.turn(card_list)
                     stage = next(self.stages)
 
                 elif stage == "river":
-                    self.river()
-                    stage = next(self.stages)
+                    self.river(card_list)
+                    #stage = next(self.stages)
 
                 # Render background and objects
                 self.screen.blit(background, (0, 0))

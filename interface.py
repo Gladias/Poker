@@ -1,6 +1,6 @@
 import pygame
 
-from const import ORANGE, BLACK, BORDER_SIZE, FONT_SIZE, WINDOW_WIDTH
+from const import ORANGE, BLACK, BORDER_SIZE, FONT_SIZE, WINDOW_WIDTH, BOTS_POSITION
 
 
 class Button:
@@ -40,12 +40,19 @@ def prepare_buttons(font):
     return [raise_button, call_button, fold_button, input_box]
 
 
-def prepare_text(name, money, round_pot, game_pot, font):
+def prepare_text(name, money, round_pot, game_pot, bots, font):
     player_name = Text(name, font, 880, 555)
     player_money = Text("${}".format(money), font, 880, 595)
     round_pot = Text("Round pot: ${}".format(round_pot), font, WINDOW_WIDTH/2, 150)
     game_pot = Text("Game pot: ${}".format(game_pot), font, WINDOW_WIDTH/2, 120)
-    return [player_name, player_money, round_pot, game_pot]
+
+    text_list = [player_name, player_money, round_pot, game_pot]
+
+    for index, bot in enumerate(bots):
+        x, y = BOTS_POSITION[index]
+        text_list.append(Text("{}    ${}".format(bot.name, bot.money), font, x, y))
+
+    return text_list
 
 
 def prepare_message(font, text, x=300, y=300):

@@ -1,6 +1,6 @@
 import pygame
 
-from const import CARD_WIDTH, CARD_HEIGHT, FIRST_HAND_CARD_X, HAND_CARDS_Y
+from const import CARD_WIDTH, CARD_HEIGHT, FIRST_HAND_CARD_X, HAND_CARDS_Y, CARD_DOWNSCALE_HEIGHT, CARD_DOWNSCALE_WIDTH
 
 
 class Card(pygame.sprite.Sprite):
@@ -8,15 +8,13 @@ class Card(pygame.sprite.Sprite):
     width = CARD_WIDTH
     height = CARD_HEIGHT
 
-    def __init__(self, number, symbol, image_path, x=0, y=0):
+    def __init__(self, number, symbol, image_path):
         super().__init__()
 
         self.number = number
         self.symbol = symbol
         self.image = pygame.image.load(image_path).convert_alpha()
         self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
 
     def __str__(self):
         if self.number == 11:
@@ -42,6 +40,12 @@ class Card(pygame.sprite.Sprite):
     def set_position(self, x, y):
         self.rect.x = x
         self.rect.y = y
+
+    def downscale(self):
+        self.rect.width = CARD_DOWNSCALE_WIDTH
+        self.rect.height = CARD_DOWNSCALE_HEIGHT
+        self.image = pygame.transform.smoothscale(self.image, (self.rect.width, self.rect.height))
+        #self.image = pygame.image.load(image_path).convert_alpha()
 
     def click(self):
         if self.rect.y == HAND_CARDS_Y:
