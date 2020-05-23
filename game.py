@@ -6,7 +6,7 @@ import deck
 from hand_evaluation import hands_combinations
 from const import ASSETS, WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE, SECOND_HAND_CARD_X, FIRST_HAND_CARD_X, HAND_CARDS_Y, \
     BORDER_SIZE
-from interface import Button, prepare_interface, prepare_message
+from interface import Button, prepare_message, prepare_buttons, prepare_text
 
 
 class Game:
@@ -138,7 +138,8 @@ class Game:
 
         # List of objects to render, obj.image and obj.rect is required
         card_list = [self.player.card_1, self.player.card_2]
-        button_list = []
+        button_list = prepare_buttons(font)
+        text_list = prepare_text(self.player.name, self.player.money, self.round_pot, self.game_pot, font)
 
         self.screen.blit(background, (0, 0))
 
@@ -151,11 +152,28 @@ class Game:
                 if event.type == pygame.QUIT:
                     sys.exit()
 
-                pygame.display.flip()
+                # Handle bet size box
+                if event.type == pygame.TEXTINPUT and event.text.isdigit():
+                    button_list[3].update_text(event.text, font)
+
+                if event.type == pygame.MOUSEBUTTONUP:
+                    # TODO: CHANGE INDEX
+                    if button_list[3].rect.collidepoint(event.pos):
+                        pygame.key.start_text_input()
+
+                    else:
+                        pygame.key.stop_text_input()
+
+
+                #pygame.display.flip()
 
                 if stage == "bet":
-                    if len(button_list) == 0:
-                        button_list.extend(prepare_interface(font))
+                    pass
+
+                    #print(pygame.event.event_name(event.type))
+
+                    #if event.type == pygame.TEXTINPUT:
+                    #    print("{}".format(event.text))
                     #self.bet(self.deck)
 
                     #for bot in self.bots:
@@ -163,9 +181,9 @@ class Game:
 
                 elif stage == "exchange":
                     message = prepare_message(font, "{} click on cards you would like to replace".format(self.player.name))
-                    button = Button(pygame.Rect(WINDOW_WIDTH/2 - 50, WINDOW_HEIGHT/2 + 100, 100, 40), "Continue", font)
+                    button = Button(pygame.Rect(WINDOW_WIDTH/2 - 70, WINDOW_HEIGHT/2 + 80, 120, 40), "Continue", font)
                     # TODO: Change
-                    if len(button_list) == 0:
+                    if len(button_list) == len(prepare_buttons(font)):
                         button_list.append(button)
 
                     if event.type == pygame.MOUSEBUTTONUP:
@@ -184,10 +202,11 @@ class Game:
                             if self.player.card_2.is_clicked():
                                 self.player.exchange(self.player.card_2, self.deck)
 
-                            # Clear message, adjust cards, remove continue button
+                            # Clear message, adjust cards, remove continue button, update card_list
                             button_list.pop()
                             message = prepare_message(font, "")
                             self.player.adjust_cards_position()
+                            card_list = [self.player.card_1, self.player.card_2]
 
                             # Run exchange simulation for bots
                             # TODO: Threads maybe
@@ -220,11 +239,13 @@ class Game:
                     pygame.draw.rect(self.screen, button.bg_color, button.rect, border_radius=BORDER_SIZE)
                     self.screen.blit(button.caption, button.text_rect)
 
-                self.screen.blit(self.player.card_1.image, self.player.card_1.rect)
-                self.screen.blit(self.player.card_2.image, self.player.card_2.rect)
+                for card in card_list:
+                    self.screen.blit(card.image, card.rect)
+                    self.screen.blit(card.image, card.rect)
 
+                for text in text_list:
+                    self.screen.blit(text.text, text.rect)
 
-                # Render text
                 self.screen.blit(message, (380, 230))
 
                 pygame.display.flip()
