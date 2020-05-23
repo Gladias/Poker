@@ -1,8 +1,9 @@
 from timeit import default_timer
 from copy import deepcopy
 
-from const import sets_and_values
+from const import sets_and_values, FIRST_HAND_CARD_X, HAND_CARDS_Y, SECOND_HAND_CARD_X
 from deck import Deck
+
 from hand_evaluation import hands_combinations
 
 
@@ -22,31 +23,35 @@ class Player:
         #print_card()
         return "{} your cards are {} AND {}, your bankroll is {}$".format(self.name, self.card_1, self.card_2, self.money)
 
-    def exchange(self, deck):
+    #def print_player(self):
+    #    print_card(player.card_1.image_path, FIRST_HAND_CARD_X, HAND_CARDS_Y)
+    #    print_card(player.card_2.image_path, SECOND_HAND_CARD_X, HAND_CARDS_Y)
+
+    def adjust_cards_position(self):
+        """Set right card position for main player"""
+        if not self.is_AI_controlled:
+            self.card_1.set_position(FIRST_HAND_CARD_X, HAND_CARDS_Y)
+            self.card_2.set_position(SECOND_HAND_CARD_X, HAND_CARDS_Y)
+
+    def select_cards(self):
+        """Move players card up or down to indicate selection in exchange phase"""
+        pass
+        #if self.card_1.x == FIRST_HAND_CARD_X:
+        #    self.card_1.x += 10
+
+
+    def exchange(self, card, deck):
         """Exchange function for not AI controlled players"""
 
-        print("{} how many cards would you like to exchange: ".format(self.name))
-        number = int(input())
-
-        if number == 1:
-            choice = int(input("Card 1 or Card 2: \n"))
-
-            if choice == 1:
-                self.card_1 = deck.pop()
-            elif choice == 2:
-                self.card_2 = deck.pop()
-            else:
-                print("No cards have been exchanged.")
-
-            print("One card has been exchanged.")
-
-        elif number == 2:
-            print("Both cards have been exchanged.")
+        if card == self.card_1:
             self.card_1 = deck.pop()
+
+        elif card == self.card_2:
             self.card_2 = deck.pop()
 
         else:
-            print("No cards have been exchanged.")
+            print("Exchange error")
+
 
     def exchange_simulation(self, deck):
         """Decide which cards to exchange in AI controlled players"""

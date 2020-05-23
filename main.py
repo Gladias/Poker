@@ -10,6 +10,7 @@ from const import ASSETS, WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE
 
 def main():
     pygame.init()
+    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
     deck = Deck()
     deck.generate()
@@ -20,10 +21,7 @@ def main():
     bot_1 = Player(name="Bot_1", deck=deck, money=1000, AI=True)
     bot_2 = Player(name="Bot_2", deck=deck, money=1000, AI=True)
 
-    screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-    game_font = pygame.font.Font(str(ASSETS / "FiraCode-Medium.ttf"), FONT_SIZE)
-
-    game = Game(deck, [alex, bot_1, bot_2], screen, game_font)
+    game = Game(deck, alex, [bot_1, bot_2], screen)
     game.run()
 
 

@@ -4,18 +4,8 @@ import pygame
 
 import deck
 from hand_evaluation import hands_combinations
-from player import Player
 from const import ASSETS, WINDOW_WIDTH, WINDOW_HEIGHT, FONT_SIZE, SECOND_HAND_CARD_X, FIRST_HAND_CARD_X, HAND_CARDS_Y
-
-
-def print_message(text, screen, game_font, x=300, y=300):
-    text_surface = game_font.render(text, False, (0, 0, 0))
-    screen.blit(text_surface, (0,0))
-
-
-def print_card(screen, image_path, x, y):
-    card = pygame.image.load(image_path).convert_alpha()
-    screen.blit(card, (x, y))
+from interface import Button
 
 
 class Game:
@@ -32,33 +22,35 @@ class Game:
     9.Cards showdown, player with best 5-card set wins.
     """
 
-    def __init__(self, deck, players, screen, game_font):
+    # message = ""
+    stages = iter(["exchange", "bet", "flop", "bet", "turn", "bet", "river", "bet", "result"])
+
+
+    def __init__(self, deck, player, bots, screen):
         self.deck = deck
         self.table = []  # list of cards on table
         self.round_pot = 0
         self.game_pot = 0
-        self.players = players
+        self.player = player
+        self.bots = bots
         self.screen = screen
-        self.game_font = game_font
+
+        # Add class variables
+        #Game.screen =
+        #Game.game_font =
 
     def exchange(self, deck):
-        for player in self.players:
-            if player.is_AI_controlled:
-                player.exchange_simulation(deck)
+        self.player.exchange(deck)
+        #for player in self.players:
+        #    if player.is_AI_controlled:
+        #        player.exchange_simulation(deck)
 
-            else:
-                player.exchange(deck)
+         #   else:
+          #      player.exchange(deck)
 
     def check_sets(self):
         for i in range(len(self.players)):
             hands_combinations(self.table, self.players[i])
-
-    def print_player(self):
-        for player in self.players:
-            if player.is_AI_controlled:
-                print_card(self.screen, player.card_1.image_path, FIRST_HAND_CARD_X, HAND_CARDS_Y)
-                print_card(self.screen, player.card_2.image_path, SECOND_HAND_CARD_X, HAND_CARDS_Y)
-
 
     def print_table(self):
         for i in self.table:
@@ -66,6 +58,8 @@ class Game:
 
     def bet(self, deck):
         self.round_pot = 0
+
+        self.player
 
         for player in self.players:
             if player.is_AI_controlled:
@@ -134,32 +128,95 @@ class Game:
         icon = pygame.image.load(str(ASSETS / "icon.png"))
         pygame.display.set_icon(icon)
         pygame.display.set_caption("Poker")
+        font = pygame.font.Font(str(ASSETS / "FiraCode-Medium.ttf"), FONT_SIZE)
 
         background = pygame.image.load(str(ASSETS / "table.png")).convert()
+
+        stage = next(self.stages)  # First stage - cards exchange
+        message = font.render("", True, (0, 0, 0))
+
+        # List of objects to render, obj.image and obj.rect is required
+        card_list = [self.player.card_1, self.player.card_2]
+        button_list = []
+
+        self.screen.blit(background, (0, 0))
+
+        self.player.adjust_cards_position()
+
+        # TODO: all_cards = pygame.sprite.Group()
 
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     sys.exit()
 
-            self.screen.blit(background, (0, 0))
-            self.print_player()
+                pygame.display.flip()
 
-            pygame.display.flip()
+                if stage == "bet":
+                    pass
+                    #self.bet(self.deck)
+                    #stage = next(self.stages)
 
-        """
-        self.exchange(deck)
+                elif stage == "exchange":
+                    message = prepare_message(font, "{} click on cards you would like to replace".format(self.player.name))
+                    button = Button(pygame.Rect(WINDOW_WIDTH/2 - 50, WINDOW_HEIGHT/2 + 100, 100, 40), "Continue", font)
+                    # TODO: Change
+                    if len(button_list) == 0:
+                        button_list.append(button)
 
-        self.bet(deck)
-        self.flop()
+                    if event.type == pygame.MOUSEBUTTONUP:
+                        if self.player.card_1.rect.collidepoint(event.pos):
+                            self.player.card_1.click()
 
-        self.bet(deck)
-        self.turn()
+                        elif self.player.card_2.rect.collidepoint(event.pos):
+                            self.player.card_2.click()
 
-        self.bet(deck)
-        self.river()
+                        elif button.rect.collidepoint(event.pos):
+                            # Continue button has been clicked
 
-        self.bet(deck)
-        self.check_sets()
-        self.result()
-        """
+                            if self.player.card_1.is_clicked():
+                                self.player.exchange(self.player.card_1, self.deck)
+
+                            if self.player.card_2.is_clicked():
+                                self.player.exchange(self.player.card_2, self.deck)
+
+                            # Clear message, adjust cards, remove continue button
+                            button_list.pop()
+                            message = prepare_message(font, "")
+                            self.player.adjust_cards_position()
+                            stage = next(self.stages)
+
+                elif stage == "flop":
+                    self.flop()
+                    stage = next(self.stages)
+
+                elif stage == "turn":
+                    self.turn()
+                    stage = next(self.stages)
+
+                elif stage == "river":
+                    self.river()
+                    stage = next(self.stages)
+
+                # Render background and objects
+                self.screen.blit(background, (0, 0))
+
+                #for card in card_list:
+                #    self.screen.blit(card.image, card.rect)
+
+                for button in button_list:
+                    pygame.draw.rect(self.screen, button.bg_color, button.rect)
+                    self.screen.blit(button.caption, (button.rect.x, button.rect.y))
+
+                self.screen.blit(self.player.card_1.image, self.player.card_1.rect)
+                self.screen.blit(self.player.card_2.image, self.player.card_2.rect)
+
+
+                # Render text
+                self.screen.blit(message, (380, 230))
+
+                pygame.display.flip()
+
+
+def prepare_message(font, text, x=300, y=300):
+    return font.render(text, True, (0, 0, 0))

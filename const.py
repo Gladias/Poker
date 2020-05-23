@@ -1,5 +1,7 @@
 from pathlib import Path
 
+# TODO: add consts
+
 sets_and_values = [
     ("ROYAL FLUSH",     10),
     ("STRAIGHT FLUSH",  9),

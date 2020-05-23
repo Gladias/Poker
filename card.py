@@ -1,6 +1,6 @@
 import pygame
 
-from const import CARD_WIDTH, CARD_HEIGHT
+from const import CARD_WIDTH, CARD_HEIGHT, FIRST_HAND_CARD_X, HAND_CARDS_Y
 
 
 class Card(pygame.sprite.Sprite):
@@ -8,13 +8,15 @@ class Card(pygame.sprite.Sprite):
     width = CARD_WIDTH
     height = CARD_HEIGHT
 
-    def __init__(self, number, symbol, image_path):
+    def __init__(self, number, symbol, image_path, x=0, y=0):
         super().__init__()
 
         self.number = number
         self.symbol = symbol
-        self.image_path = image_path
-        # Todo: RECT
+        self.image = pygame.image.load(image_path).convert_alpha()
+        self.rect = self.image.get_rect()
+        self.rect.x = x
+        self.rect.y = y
 
     def __str__(self):
         if self.number == 11:
@@ -32,7 +34,23 @@ class Card(pygame.sprite.Sprite):
 
     # methods used for card comparison in sorting
     def __eq__(self, other_card):
-        return self.number == other_card.number and self.symbol == other_card.number
+        return self.number == other_card.number and self.symbol == other_card.symbol
 
     def __lt__(self, other_card):
         return self.number < other_card.number
+
+    def set_position(self, x, y):
+        self.rect.x = x
+        self.rect.y = y
+
+    def click(self):
+        if self.rect.y == HAND_CARDS_Y:
+            self.rect.y -= 15
+        else:
+            self.rect.y += 15
+
+    def is_clicked(self):
+        if self.rect.y != HAND_CARDS_Y:
+            return True
+        else:
+            return False
