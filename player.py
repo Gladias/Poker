@@ -17,6 +17,9 @@ class Player:
         self.money = money
         self.is_AI_controlled = AI
         self.position = position
+        self.is_playing = True
+        self.is_player_turn = False
+        self.bet_size = 0
         # ToDo: self.image_path = image_path
         self.card_set = ()  # tuple with name and value of players 5 card set
 

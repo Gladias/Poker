@@ -47,3 +47,13 @@ BOTS_POSITION = [(1100, 440),  # BOT_1
 TABLE_CARD_1_X = 400
 TABLE_CARDS_Y = 300
 TABLE_CARDS_OFFSET = 10
+
+
+CHIP_WIDTH = 24
+CHIP_HEIGHT = 24
+
+CHIPS_POSITION = [(390, 535),  # Player's chip
+                  (970, 475),  # Bot_1's chip
+                  (820, 225),  # Bot_2's chip
+                  (410, 225),  # Bot_3's chip
+                  (285, 475)]  # Bot_4's chip

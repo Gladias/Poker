@@ -1,6 +1,7 @@
 import pygame
 
-from const import ORANGE, BLACK, BORDER_SIZE, FONT_SIZE, WINDOW_WIDTH, BOTS_POSITION
+from const import ORANGE, BLACK, BORDER_SIZE, FONT_SIZE, WINDOW_WIDTH, BOTS_POSITION, CHIPS_POSITION, CHIP_HEIGHT, \
+    ASSETS
 
 
 class Button:
@@ -21,14 +22,30 @@ class Button:
 
 
 class Text:
-    def __init__(self, text, font, x, y, font_size=FONT_SIZE, color=BLACK):
+    def __init__(self, text, font, x=380, y=230, font_size=FONT_SIZE, color=BLACK):
         self.font = font
         self.text_str = text
         self.text = prepare_message(self.font, text)
         self.rect = self.text.get_rect(center=(x, y))
 
 
+class Chip:
+    def __init__(self, position, value: int, font, image_path=str(ASSETS / "casino.png")):
+        self.image = pygame.image.load(image_path).convert_alpha()
+        self.chip_rect = self.image.get_rect(center=CHIPS_POSITION[position])
+        #self.chip_rect.x, self.chip_rect.y = CHIPS_POSITION(position)
+        self.value = value
+        self.font = font
+        self.text = prepare_message(self.font, str(self.value))
+
+        self.text_rect = self.text.get_rect(center=(self.chip_rect.x + 12, self.chip_rect.y + 35))
+        print(self.chip_rect.x, self.text_rect.x)
+
 # TODO: Maybe move prepare def to classes
+
+
+def get_chip_position(player_position):
+    return CHIPS_POSITION(player_position)
 
 def prepare_buttons(font):
     raise_button = Button(pygame.Rect(825, 645, 100, 40), "Raise", font, ORANGE)
@@ -37,7 +54,7 @@ def prepare_buttons(font):
 
     input_box = Button(pygame.Rect(825 + 260, 545, 140, 50), "", font, (255, 255, 255))
 
-    return [raise_button, call_button, fold_button, input_box]
+    return raise_button, call_button, fold_button, input_box
 
 
 def prepare_text(name, money, round_pot, game_pot, bots, font):
