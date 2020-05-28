@@ -1,12 +1,12 @@
-from random import shuffle
+import random
 
-from card import Card
-from const import ASSETS
+import card
+import const
 
 
 class Deck:
-    """
-    Represent a deck of 52 cards.
+    """Represents a deck of 52 cards.
+
     Cards are numerated from 2 to 14, where:
     2 to 10 - normal cards
     11 - Jack
@@ -21,32 +21,35 @@ class Deck:
 
     def __str__(self):
         deck_str = ""
-        for i, card in enumerate(self.deck):
-            deck_str += "{}. {}\n".format(i + 1, card)
+        for i, card_object in enumerate(self.deck):
+            deck_str += "{}. {}\n".format(i + 1, card_object)
 
         return deck_str
 
     def generate(self):
+        """Generates sorted deck."""
         next_element = -1
 
         for i in range(52):
             if i % 13 == 0:
                 next_element += 1
 
-            n = i % 13 + 2  # numbers from 2 to 14
-            image_path = ASSETS / "cards" / "{}{}.png".format(n, self.symbols[next_element][0])
-            self.deck.append(Card(n, self.symbols[next_element], str(image_path)))
+            number = i % 13 + 2  # numbers from 2 to 14
+            image_path = const.ASSETS / "cards" / "{}{}.png".format(number, self.symbols[next_element][0])
+            self.deck.append(card.Card(number, self.symbols[next_element], str(image_path)))
 
     def shuffle(self):
-        shuffle(self.deck)
+        """Shuffles whole deck."""
+        random.shuffle(self.deck)
 
     def push(self, card_to_push):
+        """Puts card at the end of deck."""
         self.deck.append(card_to_push)
 
-    def pop(self):
+    def draw(self):
+        """Draws one card from deck."""
         return self.deck.pop()
 
     def remove(self, card_to_remove):
-        for i, card in enumerate(self.deck):
-            if card == card_to_remove:
-                self.deck.remove(card)
+        """Removes card from deck."""
+        self.deck.remove(card_to_remove)

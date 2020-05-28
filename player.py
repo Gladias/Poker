@@ -12,8 +12,8 @@ class Player:
 
     def __init__(self, name, deck, money, AI, position, image_path=None):
         self.name = name
-        self.card_1 = deck.pop()
-        self.card_2 = deck.pop()
+        self.card_1 = deck.draw()
+        self.card_2 = deck.draw()
         self.money = money
         self.is_AI_controlled = AI
         self.position = position
@@ -21,7 +21,7 @@ class Player:
         self.is_player_turn = False
         self.bet_size = 0
         # ToDo: self.image_path = image_path
-        self.card_set = ()  # tuple with name and value of players 5 card set
+        self.card_set = ()  # tuple with name and value of players 5 card set  # TODO: REMOVE PROBABLY
 
     def __str__(self):
         #print_card()
@@ -48,15 +48,15 @@ class Player:
         """Exchange function for not AI controlled players"""
 
         if card == self.card_1:
-            self.card_1 = deck.pop()
+            self.card_1 = deck.draw()
 
         elif card == self.card_2:
-            self.card_2 = deck.pop()
+            self.card_2 = deck.draw()
 
         else:
             print("Exchange error")
 
-
+    # TODO: move to game
     def exchange_simulation(self, deck):
         """Decide which cards to exchange in AI controlled players"""
         t_start = default_timer()
@@ -70,7 +70,7 @@ class Player:
         simulation_deck = Deck()
         simulation_deck.generate()
 
-        # remove 2 cards in players hand from simulation deck
+        # remove 2 cards in player's hand from simulation deck
         simulation_deck.remove(self.card_1)
         simulation_deck.remove(self.card_2)
 
@@ -105,7 +105,7 @@ class Player:
 
         # 2. Exchange first card
 
-        self.card_1 = simulation_deck.pop()
+        self.card_1 = simulation_deck.draw()
 
         for _ in range(N):
             simulation_deck.shuffle()
@@ -119,7 +119,7 @@ class Player:
 
         # 3. Exchange second card
 
-        self.card_2 = simulation_deck.pop()
+        self.card_2 = simulation_deck.draw()
 
         for _ in range(N):
             simulation_deck.shuffle()
@@ -133,8 +133,8 @@ class Player:
 
         # 4. Exchange both cards
 
-        self.card_1 = simulation_deck.pop()
-        self.card_2 = simulation_deck.pop()
+        self.card_1 = simulation_deck.draw()
+        self.card_2 = simulation_deck.draw()
 
         for _ in range(N):
             simulation_deck.shuffle()
@@ -163,17 +163,14 @@ class Player:
             print("{} doesn't exchange any cards.".format(self.name))
         elif best_variant == 1:
             print("{} exchanges first card.".format(self.name))
-            self.card_1 = deck.pop()
+            self.card_1 = deck.draw()
         elif best_variant == 2:
             print("{} exchanges second card.".format(self.name))
-            self.card_2 = deck.pop()
+            self.card_2 = deck.draw()
         else:
             print("{} exchanges both cards.".format(self.name))
-            self.card_1 = deck.pop()
-            self.card_2 = deck.pop()
+            self.card_1 = deck.draw()
+            self.card_2 = deck.draw()
 
         t_end = default_timer()
         print("|{} made a decision in {:.2f}s|".format(self.name, t_end-t_start))
-
-    def bet_simulation(self, deck):
-        pass

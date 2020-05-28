@@ -17,7 +17,7 @@ def main():
     deck.shuffle()
 
     # Only one player can be AI=False, this is user
-    alex = Player(name="Alex", deck=deck, money=1000, AI=False, position=0)
+    alex = Player(name="Alex", deck=deck, money=2000, AI=False, position=0)
     bot_1 = Player(name="Bot_1", deck=deck, money=1000, AI=True, position=1)
     bot_2 = Player(name="Bot_2", deck=deck, money=1000, AI=True, position=2)
     bot_3 = Player(name="Bot_3", deck=deck, money=1000, AI=True, position=3)

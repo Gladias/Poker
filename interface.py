@@ -22,7 +22,7 @@ class Button:
 
 
 class Text:
-    def __init__(self, text, font, x=380, y=230, font_size=FONT_SIZE, color=BLACK):
+    def __init__(self, text, font, x=625, y=235, font_size=FONT_SIZE, color=BLACK):
         self.font = font
         self.text_str = text
         self.text = prepare_message(self.font, text)
@@ -39,7 +39,6 @@ class Chip:
         self.text = prepare_message(self.font, str(self.value))
 
         self.text_rect = self.text.get_rect(center=(self.chip_rect.x + 12, self.chip_rect.y + 35))
-        print(self.chip_rect.x, self.text_rect.x)
 
 # TODO: Maybe move prepare def to classes
 
@@ -70,6 +69,9 @@ def prepare_text(name, money, round_pot, game_pot, bots, font):
         text_list.append(Text("{}    ${}".format(bot.name, bot.money), font, x, y))
 
     return text_list
+
+def next_stage_update():
+    pass
 
 
 def prepare_message(font, text, x=300, y=300):

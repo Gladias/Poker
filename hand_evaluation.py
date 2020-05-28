@@ -56,18 +56,18 @@ def hand_ranking(combination: []):
         return sets_and_values[9]
 
 
-def hands_combinations(table, player):
+def hands_combinations(table_and_player_cards, bot):
     """
     Check all 5 elements combinations of players cards and cards on table
     and set each players card_set tuple to the best combination they have.
     """
 
-    cards = []
-    cards.extend(table)
-    cards.append(player.card_1)
-    cards.append(player.card_2)
+    #cards = []
+    #cards.extend(table)
+    #cards.append(player.card_1)
+    #cards.append(player.card_2)
 
-    comb_list = list(combinations(cards, 5))
+    comb_list = list(combinations(table_and_player_cards, 5))
 
     best_value = 0
 
@@ -75,5 +75,5 @@ def hands_combinations(table, player):
         combination = hand_ranking(list(comb_list[j]))
 
         if combination[1] > best_value:
-            player.card_set = combination
+            bot.card_set = combination
             best_value = combination[1]

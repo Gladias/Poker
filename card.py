@@ -1,12 +1,12 @@
 import pygame
 
-from const import CARD_WIDTH, CARD_HEIGHT, FIRST_HAND_CARD_X, HAND_CARDS_Y, CARD_DOWNSCALE_HEIGHT, CARD_DOWNSCALE_WIDTH
+import const
 
 
-class Card(pygame.sprite.Sprite):
+class Card:
     """Represent a single card."""
-    width = CARD_WIDTH
-    height = CARD_HEIGHT
+    width = const.CARD_WIDTH
+    height = const.CARD_HEIGHT
 
     def __init__(self, number, symbol, image_path):
         super().__init__()
@@ -42,19 +42,19 @@ class Card(pygame.sprite.Sprite):
         self.rect.y = y
 
     def downscale(self):
-        self.rect.width = CARD_DOWNSCALE_WIDTH
-        self.rect.height = CARD_DOWNSCALE_HEIGHT
+        self.rect.width = const.CARD_DOWNSCALE_WIDTH
+        self.rect.height = const.CARD_DOWNSCALE_HEIGHT
         self.image = pygame.transform.smoothscale(self.image, (self.rect.width, self.rect.height))
         #self.image = pygame.image.load(image_path).convert_alpha()
 
     def click(self):
-        if self.rect.y == HAND_CARDS_Y:
+        if self.rect.y == const.HAND_CARDS_Y:
             self.rect.y -= 15
         else:
             self.rect.y += 15
 
     def is_clicked(self):
-        if self.rect.y != HAND_CARDS_Y:
+        if self.rect.y != const.HAND_CARDS_Y:
             return True
         else:
             return False
