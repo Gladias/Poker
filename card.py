@@ -4,13 +4,15 @@ import const
 
 
 class Card:
-    """Represent a single card."""
+    """Represents a single card.
+
+    Card object contains:
+    number, symbol, image, and rect - coordinates used for click detection and positioning.
+    """
     width = const.CARD_WIDTH
     height = const.CARD_HEIGHT
 
     def __init__(self, number, symbol, image_path):
-        super().__init__()
-
         self.number = number
         self.symbol = symbol
         self.image = pygame.image.load(image_path).convert_alpha()
@@ -30,7 +32,6 @@ class Card:
 
         return card
 
-    # methods used for card comparison in sorting
     def __eq__(self, other_card):
         return self.number == other_card.number and self.symbol == other_card.symbol
 
@@ -38,23 +39,23 @@ class Card:
         return self.number < other_card.number
 
     def set_position(self, x, y):
+        """Sets card top left corner position to x, y coordinates."""
         self.rect.x = x
         self.rect.y = y
 
     def downscale(self):
+        """Sets card's new width and height and downscales card's image."""
         self.rect.width = const.CARD_DOWNSCALE_WIDTH
         self.rect.height = const.CARD_DOWNSCALE_HEIGHT
         self.image = pygame.transform.smoothscale(self.image, (self.rect.width, self.rect.height))
-        #self.image = pygame.image.load(image_path).convert_alpha()
 
     def click(self):
+        """Moves card up or down by 15 pixels."""
         if self.rect.y == const.HAND_CARDS_Y:
             self.rect.y -= 15
         else:
             self.rect.y += 15
 
     def is_clicked(self):
-        if self.rect.y != const.HAND_CARDS_Y:
-            return True
-        else:
-            return False
+        """Returns true if card position is different from standard."""
+        return self.rect.y != const.HAND_CARDS_Y

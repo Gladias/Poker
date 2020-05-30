@@ -1,6 +1,6 @@
-from itertools import combinations
+import itertools
 
-from const import sets_and_values
+import const
 
 
 def hand_ranking(combination: []):
@@ -26,34 +26,34 @@ def hand_ranking(combination: []):
                 pairs.append(combination[i].number)
 
     if flush and straight and combination[0].number == 10:
-        return sets_and_values[0]
+        return const.SETS_AND_VALUES[0]
 
     elif flush and straight:
-        return sets_and_values[1]
+        return const.SETS_AND_VALUES[1]
 
     elif len(pairs) > 4:
-        return sets_and_values[2]
+        return const.SETS_AND_VALUES[2]
 
     elif len(pairs) == 4:
-        return sets_and_values[3]
+        return const.SETS_AND_VALUES[3]
 
     elif flush:
-        return sets_and_values[4]
+        return const.SETS_AND_VALUES[4]
 
     elif straight:
-        return sets_and_values[5]
+        return const.SETS_AND_VALUES[5]
 
     elif len(pairs) == 3:
-        return sets_and_values[6]
+        return const.SETS_AND_VALUES[6]
 
     elif len(pairs) == 2:
-        return sets_and_values[7]
+        return const.SETS_AND_VALUES[7]
 
     elif len(pairs) == 1:
-        return sets_and_values[8]
+        return const.SETS_AND_VALUES[8]
 
     else:
-        return sets_and_values[9]
+        return const.SETS_AND_VALUES[9]
 
 
 def hands_combinations(table_and_player_cards, bot):
@@ -67,7 +67,7 @@ def hands_combinations(table_and_player_cards, bot):
     #cards.append(player.card_1)
     #cards.append(player.card_2)
 
-    comb_list = list(combinations(table_and_player_cards, 5))
+    comb_list = list(itertools.combinations(table_and_player_cards, 5))
 
     best_value = 0
 

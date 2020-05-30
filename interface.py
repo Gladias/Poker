@@ -1,85 +1,130 @@
 import pygame
 
-from const import ORANGE, BLACK, BORDER_SIZE, FONT_SIZE, WINDOW_WIDTH, BOTS_POSITION, CHIPS_POSITION, CHIP_HEIGHT, \
-    ASSETS
+import const
 
 
-class Button:
-    def __init__(self, rect, caption, font, bg_color=ORANGE, border_size=BORDER_SIZE, border_color=BLACK):
+class GameObject:
+    """Base class for game objects."""
+    def __init__(self, rect, text, font):
         self.rect = rect
-        self.caption_str = caption
-        self.caption = prepare_message(font, self.caption_str)
+
+        self.text = text
+        self.rendered_text = self.render_text(text)
+        self.text_rect = self.rendered_text.get_rect()
         self.font = font
-        self.text_rect = self.caption.get_rect(center=(self.rect.x + self.rect.width/2, self.rect.y + self.rect.height/2))
+
+    def render_text(self, text):
+        """Renders Pygame text object with given text value."""
+        return self.font.render(text, True, const.BLACK)
+
+    def update_text(self, new_text):
+        """Updates text value and invokes render_text method."""
+        self.text = new_text
+        self.rendered_text = self.render_text(new_text)
+
+    def update_rect_position(self, is_center_update, x, y):
+        """Updates object's rect position."""
+        if is_center_update:
+            self.rect.center = (x, y)
+        else:
+            self.rect.x = x
+            self.rect.y = y
+
+
+class Text(GameObject):
+    """Represents text object."""
+    def __init__(self, text, font, position=const.INFO, rect=None):
+        super().__init__(rect, text, font)
+        self.rect.center = position
+
+
+class Button(GameObject):
+    """Represents button with position, centered caption, color and border."""
+    def __init__(self, rect, text, font,
+                 bg_color=const.ORANGE,
+                 border_size=const.BORDER_SIZE,
+                 border_color=const.BLACK):
+
+        super().__init__(rect, text, font)
+        self.text_rect.center = (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2)
+
         self.bg_color = bg_color
-        self.border_rect = (rect.x - border_size, rect.y - border_size, rect.width + 2*border_size, rect.height + 2*border_size)
+        self.border_rect = (
+            rect.x - border_size, rect.y - border_size,
+            rect.width + 2 * border_size, rect.height + 2 * border_size)
         self.border_color = border_color
 
-    def update_text(self, letter, font):
-        self.caption_str += letter
-        self.caption = prepare_message(font, self.caption_str)
-        self.text_rect.x = self.rect.x
 
+class Chip(GameObject):
+    """Represents chip with position, image and caption with value."""
+    def __init__(self, rect, value, font, position):
+        super().__init__(rect, str(value), font)
+        self.image = pygame.image.load(str(const.ASSETS / "chip.png")).convert_alpha()
+        self.rect = self.image.get_rect(center=const.CHIPS_POSITION[position])
 
-class Text:
-    def __init__(self, text, font, x=625, y=235, font_size=FONT_SIZE, color=BLACK):
-        self.font = font
-        self.text_str = text
-        self.text = prepare_message(self.font, text)
-        self.rect = self.text.get_rect(center=(x, y))
-
-
-class Chip:
-    def __init__(self, position, value: int, font, image_path=str(ASSETS / "casino.png")):
-        self.image = pygame.image.load(image_path).convert_alpha()
-        self.chip_rect = self.image.get_rect(center=CHIPS_POSITION[position])
-        #self.chip_rect.x, self.chip_rect.y = CHIPS_POSITION(position)
         self.value = value
-        self.font = font
-        self.text = prepare_message(self.font, str(self.value))
-
-        self.text_rect = self.text.get_rect(center=(self.chip_rect.x + 12, self.chip_rect.y + 35))
-
-# TODO: Maybe move prepare def to classes
+        self.text_rect.center = (self.rect.x + const.CHIP_CAPTION[0], self.rect.y + const.CHIP_CAPTION[1])
 
 
-def get_chip_position(player_position):
-    return CHIPS_POSITION(player_position)
+def text_init(game):
+    """Initializes texts: round and game pot, name and money for every player."""
+    player_name = Text(game.player.name, game.font, const.PLAYER_NAME)
+    player_money = Text("${}".format(game.money), game.font, const.PLAYER_MONEY)
 
-def prepare_buttons(font):
-    raise_button = Button(pygame.Rect(825, 645, 100, 40), "Raise", font, ORANGE)
-    call_button = Button(pygame.Rect(825 + 150, 645, 100, 40), "Call", font, ORANGE)
-    fold_button = Button(pygame.Rect(825 + 300, 645, 100, 40), "Fold", font, ORANGE)
+    round_pot = Text("Round pot: ${}".format(game.round_pot), game.font, const.ROUND_POT)
+    game_pot = Text("Game pot: ${}".format(game.game_pot), game.font, const.GAME_POT)
 
-    input_box = Button(pygame.Rect(825 + 260, 545, 140, 50), "", font, (255, 255, 255))
+    text_list = [player_name, player_money, round_pot, game_pot]
+
+    for index, bot in enumerate(game.bots):
+        x, y = const.BOTS_POSITION[index]
+        text_list.append(Text("{}    ${}".format(bot.name, bot.money), game.font, x, y))
+
+    return text_list
+
+
+def buttons_init(game):
+    """Initializes raise, call, fold and input buttons."""
+    raise_button = Button(pygame.Rect(const.RAISE), "Raise", game.font, const.ORANGE)
+    call_button = Button(pygame.Rect(const.CALL), "Call", game.font, const.ORANGE)
+    fold_button = Button(pygame.Rect(const.FOLD), "Fold", game.font, const.ORANGE)
+
+    input_box = Button(pygame.Rect(const.INPUT_BOX), "", game, const.WHITE)
 
     return raise_button, call_button, fold_button, input_box
 
 
-def prepare_text(name, money, round_pot, game_pot, bots, font):
-    player_name = Text(name, font, 880, 555)
-    player_money = Text("${}".format(money), font, 880, 595)
-    round_pot = Text("Round pot: ${}".format(round_pot), font, WINDOW_WIDTH/2, 150)
-    game_pot = Text("Game pot: ${}".format(game_pot), font, WINDOW_WIDTH/2, 120)
+def clear_stage(game_pot, round_pot, chip_list, text_list):
+    """Clears chip_list and updates game and round pot display."""
+    chip_list.clear()
+    text_list.pop()
 
-    text_list = [player_name, player_money, round_pot, game_pot]
-
-    for index, bot in enumerate(bots):
-        x, y = BOTS_POSITION[index]
-        text_list.append(Text("{}    ${}".format(bot.name, bot.money), font, x, y))
-
-    return text_list
-
-def next_stage_update():
-    pass
+    for obj in text_list:
+        if "Round" in obj.text:
+            obj.update_text(str(round_pot))
+        elif "Game" in obj.text:
+            obj.update_text(str(game_pot))
 
 
-def prepare_message(font, text, x=300, y=300):
-    return font.render(text, True, (0, 0, 0))
+def update_screen(button_list, card_list, text_list, chip_list, background, screen):
+    """Renders buttons, texts, cards and chips objects"""
+    screen.blit(background, (0, 0))
 
+    for button in button_list:
+        # Pygame version >= 2.0.0.dev8 is required for border_radius rect parameter.
+        pygame.draw.rect(screen, button.border_color, button.border_rect, border_radius=const.BORDER_SIZE)
+        pygame.draw.rect(screen, button.bg_color, button.rect, border_radius=const.BORDER_SIZE)
+        screen.blit(button.caption, button.text_rect)
 
+    for card in card_list:
+        screen.blit(card.image, card.rect)
+        screen.blit(card.image, card.rect)
 
+    for text in text_list:
+        screen.blit(text.text, text.rect)
 
-# class Interface:
-#    def __init__(self):
-#        self.button_list = []
+    for chip in chip_list:
+        screen.blit(chip.image, chip.chip_rect)
+        screen.blit(chip.text, chip.text_rect)
+
+    pygame.display.flip()
