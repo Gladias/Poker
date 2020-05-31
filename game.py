@@ -15,7 +15,7 @@ class Game:
     """Controls game flow, handles user input, displays object on screen and invokes game stages.
 
     Game stages:
-    1.Exchange of cards
+    1.Replacement of cards
     2.Bet
     3.Flop - 3 common cards are displayed on table
     4.Bet
@@ -34,7 +34,7 @@ class Game:
         self.game_pot = 0
         self.main_player = main_player
         self.bots = bots
-        self.info = "Welcome"
+        self.info = ""
         self.screen = screen
         self.font = pygame.font.Font(str(const.ASSETS / "FiraCode-Medium.ttf"), const.FONT_SIZE)
 
@@ -56,7 +56,7 @@ class Game:
         active_players = self.active_players()
 
         # List of format [false, false, false, true, false]
-        players_turns = [player.is_player_turn for player in active_players]
+        players_turns = [player.flags["is_player_turn"] for player in active_players]
 
         if players_turns[-1]:  # If it's last player's turn, set turn to first player
             players_turns.reverse()
@@ -95,7 +95,7 @@ class Game:
             self.round_pot += bet
             player.bet_size += bet
 
-            chip_list.append(interface.Chip(player.position, bet_value, self.font))
+            chip_list.append(interface.Chip(None, bet_value, self.font, player.position))
 
             self.info = "{} raises to ${}".format(player.name, bet_value)
             self.next_player_turn()
@@ -120,7 +120,8 @@ class Game:
             self.round_pot += bet
             player.bet_size = previous_player.bet_size
 
-            chip_list.append(interface.Chip(player.position, previous_player.bet_size, self.font))
+            chip_list.append(interface.Chip(player.position, previous_player.bet_size,
+                                            self.font, player.position))
 
             self.info = "{} calls ${}".format(player.name, previous_player.bet_size)
             self.next_player_turn()
@@ -143,13 +144,13 @@ class Game:
         else:
             self.info = "You are not in game this turn"
 
-    def replace(self, button_list):
-        self.info = "{} click on cards you would like to replace".format(self.main_player.name)
-
+    def replace(self, event, button_list):
+        """Replaces cards clicked by player."""
         continue_button = interface.Button(pygame.Rect(const.CONTINUE), "Continue", self.font)
 
-        if len(button_list) == len(prepare_buttons(font)):
-            button_list.append(button)
+        # Add button to list only once
+        if len(button_list) == const.BUTTON_LIST_LEN:
+            button_list.append(continue_button)
 
         if event.type == pygame.MOUSEBUTTONUP:
             if self.main_player.card_1.rect.collidepoint(event.pos):
@@ -158,29 +159,24 @@ class Game:
             elif self.main_player.card_2.rect.collidepoint(event.pos):
                 self.main_player.card_2.click()
 
-            elif button.rect.collidepoint(event.pos):
+            elif continue_button.rect.collidepoint(event.pos):
                 # Continue button has been clicked
-
                 if self.main_player.card_1.is_clicked():
                     self.main_player.replace_card(self.main_player.card_1, self.game_deck)
 
                 if self.main_player.card_2.is_clicked():
                     self.main_player.replace_card(self.main_player.card_2, self.game_deck)
 
-                # Clear message, adjust cards, remove continue button, update card_list
+                # Adjust cards, remove continue button, update card_list
                 button_list.pop()
-                text_list.pop()
                 self.main_player.set_cards_position()
-                card_list = [self.main_player.card_1, self.main_player.card_2]
-
-                # Run exchange simulation for bots
-                for bot in self.bots:
-                    simulations.replace_simulation(bot, self.game_deck)
+                return True
+        return False
 
     def replace_simulation(self, bot, game_deck):
         """Decide which cards to exchange in AI controlled players"""
         t_start = timeit.default_timer()
-        N = 2000
+        N = 5000
         # Number of simulations per case, there are 4 cases because player can do 1 action from 4 available:
         # 1. Don't exchange cards
         # 2. Replace first card
@@ -293,6 +289,33 @@ class Game:
         t_end = timeit.default_timer()
         print("Bot made a decision in {:.2f}s|".format(t_end - t_start))
 
+    def bet(self, event, active_players, fold_button, call_button, raise_button, chip_list, bet_input):
+        if not active_players:
+            pass  # TODO: new game
+
+        if self.main_player.is_player_turn:
+            self.info = "{} it's your turn".format(self.main_player.name)
+
+        if event.type == pygame.MOUSEBUTTONUP and self.main_player.is_player_turn:
+            if fold_button.rect.collidepoint(event.pos):
+                self.fold(self.main_player)
+
+            elif call_button.rect.collidepoint(event.pos):
+                previous_bet_size = self.previous_player(self.main_player).bet_size
+
+                if not previous_bet_size - self.main_player.bet_size:
+                    self.wait(self.main_player)
+                else:
+                    self.call(self.main_player, chip_list)
+                interface.text_init(self)
+
+            elif raise_button.rect.collidepoint(event.pos):
+                self.raise_pot(self.main_player, bet_input, chip_list)
+                interface.text_init(self)
+
+            return True
+        return False
+
     def bet_simulation(self, bot, chip_list):
         """Decides to call, raise or fold in AI controlled players.
 
@@ -305,11 +328,11 @@ class Game:
 
         previous_bet_size = self.previous_player(bot).bet_size
 
-        can_bot_wait = bool(previous_bet_size - bot.bet_size)
-
-        if can_bot_wait:
+        if not previous_bet_size - bot.bet_size:
+            can_bot_wait = True
             bet_ratio = 5
         else:
+            can_bot_wait = False
             bet_ratio = bot.money / (previous_bet_size - bot.bet_size)
 
         # Bot doesn't have enough money
@@ -435,7 +458,7 @@ class Game:
             card.downscale()
 
             card.set_position(
-                const.TABLE_CARD_1_X + (card.rect.width + const.TABLE_CARDS_OFFSET)*4,
+                const.TABLE_CARD_1_X + (card.rect.width + const.TABLE_CARDS_OFFSET) * 4,
                 const.TABLE_CARDS_Y)
 
             card_list.append(card)
@@ -495,18 +518,15 @@ class Game:
 
         # Lists of objects rendered each frame
         card_list = [self.main_player.card_1, self.main_player.card_2]
-        raise_button, call_button, fold_button, input_box = interface.buttons_init(self.font)
+        raise_button, call_button, fold_button, input_box = interface.buttons_init(self)
         button_list = [raise_button, call_button, fold_button, input_box]
         chip_list = []
-        text_list = interface.text_init(self.main_player.name, self.main_player.money,
-                                        self.round_pot, self.game_pot,
-                                        self.bots, self.font)
+        text_list = interface.text_init(self)
 
-        standard_text_list_len = len(text_list)
         bet_input = ""
 
         self.main_player.set_cards_position()
-        self.main_player.is_player_turn = True
+        self.main_player.flags["is_player_turn"] = True
 
         self.screen.blit(background, (0, 0))
 
@@ -518,7 +538,7 @@ class Game:
                 # Handle bet size box
                 if event.type == pygame.TEXTINPUT and event.text.isdigit():
                     bet_input += event.text
-                    button_list[3].update_text(event.text, self.font)
+                    input_box.update_text(bet_input)
 
                 if event.type == pygame.MOUSEBUTTONUP:
                     if input_box.rect.collidepoint(event.pos):
@@ -529,54 +549,49 @@ class Game:
                 if stage == "bet":
                     active_players = self.active_players()
 
-                    if len(active_players):
-                        pass  # TODO: new game
-
-                    if self.main_player.bet_size == active_players[-1].bet_size and self.main_player.bet_size > 0:
+                    if self.main_player.bet_size == active_players[-1].bet_size \
+                            and self.main_player.bet_size > 0:
                         stage = next(self.stages)
 
-                    screen_update(button_list, card_list, text_list, chip_list, background, self.screen)
+                    if self.bet(event, active_players, fold_button, call_button, raise_button, chip_list, bet_input):
+                        text_list = interface.text_init(self)
+                        interface.update_screen(button_list, card_list, text_list, chip_list,
+                                                background, self.screen)
+                        interface.update_info(self.info, self.font, self.screen)
+                        pygame.display.flip()
 
-                    if self.main_player.is_player_turn:
-                        message = Text("{} it's your turn".format(self.main_player.name), font)
-                        if len(text_list) == standard_text_list_len + 1:
-                            text_list.pop()
-                            text_list.append(message)
+                        # Run bet simulation for bots
+                        if not self.main_player.flags["is_player_turn"]:
+                            for bot in self.bots:
+                                if bot.flags["is_active"]:
+                                    self.bet_simulation(bot, chip_list)
+                                    text_list = interface.text_init(self)
+                                    interface.update_screen(button_list, card_list, text_list,
+                                                            chip_list, background, self.screen)
+                                    interface.update_info(self.info, self.font, self.screen)
+                                    pygame.display.flip()
+                                    if active_players[0].bet_size == active_players[-1].bet_size \
+                                            and active_players[0].bet_size > 0:
+                                        stage = next(self.stages)
 
-                    if event.type == pygame.MOUSEBUTTONUP and self.main_player.is_player_turn:
-                        if fold_button.rect.collidepoint(event.pos):
-                            self.fold(self.main_player)
+                elif stage == "replace":
+                    self.info = "{} click on cards you would like to replace".format(self.main_player.name)
+                    interface.update_info(self.info, self.font, self.screen)
+                    # Replace method returns True if player clicked continue button
+                    if self.replace(event, button_list):
+                        card_list = [self.main_player.card_1, self.main_player.card_2]
 
-                        elif call_button.rect.collidepoint(event.pos):
-                            message = Text(self.call(self.main_player, chip_list, font), font)
-                            # TODO: Make update method
-                            text_list = prepare_text(self.main_player.name, self.main_player.money, self.round_pot, self.game_pot, self.bots, font)
-                            text_list.append(message)
+                        self.info = "Bots make replacement simulations"
+                        interface.update_screen(button_list, card_list, text_list, chip_list,
+                                                background, self.screen)
+                        interface.update_info(self.info, self.font, self.screen)
+                        pygame.display.flip()
 
-                        elif raise_button.rect.collidepoint(event.pos):
-                            message = Text(self.raise_pot(self.main_player, bet_input, chip_list, font), font)
-                            # TODO: Make update method
-                            text_list = prepare_text(self.main_player.name, self.main_player.money, self.round_pot, self.game_pot, self.bots, font)
-                            text_list.append(message)
-                            print(len(chip_list))
-
-                    screen_update(button_list, card_list, text_list, chip_list, background, self.screen)
-
-                    if not self.main_player.is_player_turn:
+                        # Run replacement simulation for bots
                         for bot in self.bots:
-                            if bot.is_playing:
-                                message = Text(self.bet_simulation(bot, chip_list, font), font)
-                                # TODO: Make update method
-                                text_list = prepare_text(self.main_player.name, self.main_player.money, self.round_pot, self.game_pot, self.bots, font)
-                                text_list.append(message)
-                                screen_update(button_list, card_list, text_list, chip_list, background, self.screen)
+                            self.replace_simulation(bot, self.game_deck)
 
-                                if playing_players[0].bet_size == playing_players[-1].bet_size and playing_players[0].bet_size > 0:
-                                    stage = next(self.stages)
-
-                elif stage == "exchange":
-                    self.replace()
-                    stage = next(self.stages)
+                        stage = next(self.stages)
 
                 elif stage == "flop":
                     self.next_stage(button_list, card_list, text_list, chip_list, background)
@@ -595,3 +610,5 @@ class Game:
                     # stage = next(self.stages)
 
                 interface.update_screen(button_list, card_list, text_list, chip_list, background, self.screen)
+                interface.update_info(self.info, self.font, self.screen)
+                pygame.display.flip()

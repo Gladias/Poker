@@ -9,9 +9,9 @@ class GameObject:
         self.rect = rect
 
         self.text = text
+        self.font = font
         self.rendered_text = self.render_text(text)
         self.text_rect = self.rendered_text.get_rect()
-        self.font = font
 
     def render_text(self, text):
         """Renders Pygame text object with given text value."""
@@ -35,7 +35,7 @@ class Text(GameObject):
     """Represents text object."""
     def __init__(self, text, font, position=const.INFO, rect=None):
         super().__init__(rect, text, font)
-        self.rect.center = position
+        self.text_rect.center = position
 
 
 class Button(GameObject):
@@ -63,22 +63,23 @@ class Chip(GameObject):
         self.rect = self.image.get_rect(center=const.CHIPS_POSITION[position])
 
         self.value = value
-        self.text_rect.center = (self.rect.x + const.CHIP_CAPTION[0], self.rect.y + const.CHIP_CAPTION[1])
+        self.text_rect.center = (self.rect.centerx, self.rect.y - const.CHIP_CAPTION[1])
 
 
 def text_init(game):
     """Initializes texts: round and game pot, name and money for every player."""
-    player_name = Text(game.player.name, game.font, const.PLAYER_NAME)
-    player_money = Text("${}".format(game.money), game.font, const.PLAYER_MONEY)
+    game_info = Text(game.info, game.font, const.INFO)
+
+    player_name = Text(game.main_player.name, game.font, const.PLAYER_NAME)
+    player_money = Text("${}".format(game.main_player.money), game.font, const.PLAYER_MONEY)
 
     round_pot = Text("Round pot: ${}".format(game.round_pot), game.font, const.ROUND_POT)
     game_pot = Text("Game pot: ${}".format(game.game_pot), game.font, const.GAME_POT)
 
-    text_list = [player_name, player_money, round_pot, game_pot]
+    text_list = [player_name, player_money, round_pot, game_pot, game_info]
 
     for index, bot in enumerate(game.bots):
-        x, y = const.BOTS_POSITION[index]
-        text_list.append(Text("{}    ${}".format(bot.name, bot.money), game.font, x, y))
+        text_list.append(Text("{}    ${}".format(bot.name, bot.money), game.font, const.BOTS_POSITION[index]))
 
     return text_list
 
@@ -86,10 +87,10 @@ def text_init(game):
 def buttons_init(game):
     """Initializes raise, call, fold and input buttons."""
     raise_button = Button(pygame.Rect(const.RAISE), "Raise", game.font, const.ORANGE)
-    call_button = Button(pygame.Rect(const.CALL), "Call", game.font, const.ORANGE)
+    call_button = Button(pygame.Rect(const.CALL), "Call|Wait", game.font, const.ORANGE)
     fold_button = Button(pygame.Rect(const.FOLD), "Fold", game.font, const.ORANGE)
 
-    input_box = Button(pygame.Rect(const.INPUT_BOX), "", game, const.WHITE)
+    input_box = Button(pygame.Rect(const.INPUT_BOX), "", game.font, const.WHITE)
 
     return raise_button, call_button, fold_button, input_box
 
@@ -106,6 +107,17 @@ def clear_stage(game_pot, round_pot, chip_list, text_list):
             obj.update_text(str(game_pot))
 
 
+def update_info(info, font, screen):
+    text = Text(info, font, const.INFO)
+    screen.blit(text.rendered_text, text.text_rect)
+
+#def update_money(text_list, player):
+  #  for text in text_list:
+  #      if player.name in text.text:
+ #           text.update_text("")
+
+
+
 def update_screen(button_list, card_list, text_list, chip_list, background, screen):
     """Renders buttons, texts, cards and chips objects"""
     screen.blit(background, (0, 0))
@@ -114,17 +126,15 @@ def update_screen(button_list, card_list, text_list, chip_list, background, scre
         # Pygame version >= 2.0.0.dev8 is required for border_radius rect parameter.
         pygame.draw.rect(screen, button.border_color, button.border_rect, border_radius=const.BORDER_SIZE)
         pygame.draw.rect(screen, button.bg_color, button.rect, border_radius=const.BORDER_SIZE)
-        screen.blit(button.caption, button.text_rect)
+        screen.blit(button.rendered_text, button.text_rect)
 
     for card in card_list:
         screen.blit(card.image, card.rect)
         screen.blit(card.image, card.rect)
 
     for text in text_list:
-        screen.blit(text.text, text.rect)
+        screen.blit(text.rendered_text, text.text_rect)
 
     for chip in chip_list:
-        screen.blit(chip.image, chip.chip_rect)
-        screen.blit(chip.text, chip.text_rect)
-
-    pygame.display.flip()
+        screen.blit(chip.image, chip.rect)
+        screen.blit(chip.rendered_text, chip.text_rect)

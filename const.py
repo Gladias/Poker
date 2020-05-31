@@ -23,7 +23,7 @@ PLAYER_FLAGS = {
 
 STARTING_MONEY = 1000
 
-GAME_STAGES = ["exchange", "bet", "flop", "bet", "turn", "bet", "river", "bet", "result"]
+GAME_STAGES = ["replace", "bet", "flop", "bet", "turn", "bet", "river", "bet", "result"]
 
 ASSETS = Path("assets/")
 
@@ -81,6 +81,8 @@ PLAYER_MONEY = (880, 595)
 ROUND_POT = (WINDOW_WIDTH / 2, 150)
 GAME_POT = (WINDOW_WIDTH / 2, 120)
 
+TEXT_LIST_LEN = 9
+
 # Buttons
 CONTINUE = (WINDOW_WIDTH / 2 - 70, WINDOW_HEIGHT / 2 + 80, 120, 40)
 
@@ -89,6 +91,8 @@ CALL = (975, 645, 100, 40)
 RAISE = (1125, 645, 100, 40)
 
 INPUT_BOX = (1085, 545, 140, 50)
+
+BUTTON_LIST_LEN = 4
 
 
 

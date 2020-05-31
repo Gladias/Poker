@@ -1,3 +1,5 @@
+import copy
+
 import const
 
 
@@ -15,7 +17,7 @@ class Player:
         self.card_1 = deck.draw()
         self.card_2 = deck.draw()
         self.money = const.STARTING_MONEY
-        self.flags = const.PLAYER_FLAGS
+        self.flags = copy.deepcopy(const.PLAYER_FLAGS)
         self.flags["is_AI_controlled"] = is_AI_controlled
         self.position = position
         self.bet_size = 0
@@ -24,13 +26,13 @@ class Player:
     def __str__(self):
         return "{} your cards are {} AND {}".format(self.name, self.card_1, self.card_2)
 
-    def set_cards_position(self, x=const.FIRST_HAND_CARD_X, y=const.HAND_CARDS_Y):
-        """Set card position for main player"""
-        self.card_1.set_position(x, y)
-        self.card_2.set_position(x, y)
+    def set_cards_position(self):
+        """Sets card position for main player"""
+        self.card_1.set_position(const.FIRST_HAND_CARD_X, const.HAND_CARDS_Y)
+        self.card_2.set_position(const.SECOND_HAND_CARD_X, const.HAND_CARDS_Y)
 
     def replace_card(self, card_to_replace, game_deck):
-        """Replace player's card with random card from deck."""
+        """Replaces player's card with random card from deck."""
 
         if card_to_replace == self.card_1:
             self.card_1 = game_deck.draw()

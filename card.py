@@ -9,8 +9,6 @@ class Card:
     Card object contains:
     number, symbol, image, and rect - coordinates used for click detection and positioning.
     """
-    width = const.CARD_WIDTH
-    height = const.CARD_HEIGHT
 
     def __init__(self, number, symbol, image_path):
         self.number = number
