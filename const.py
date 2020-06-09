@@ -1,36 +1,48 @@
-from pathlib import Path
+import enum
+import pathlib
 
 
-SETS_AND_VALUES = [
-    ("ROYAL FLUSH", 10),
-    ("STRAIGHT FLUSH", 9),
-    ("FOUR OF A KIND", 8),
-    ("FULL HOUSE", 7),
-    ("FLUSH", 6),
-    ("STRAIGHT", 5),
-    ("THREE OF A KIND", 4),
-    ("TWO PAIRS", 3),
-    ("ONE PAIR", 2),
-    ("HIGH CARD", 1)
-]
+class SetsAndValues(enum.Enum):
+    ROYAL_FLUSH = 10
+    STRAIGHT_FLUSH = 9
+    FOUR_OF_A_KIND = 8
+    FULL_HOUSE = 7
+    FLUSH = 6
+    STRAIGHT = 5
+    THREE_OF_A_KIND = 4
+    TWO_PAIRS = 3
+    ONE_PAIR = 2
+    HIGH_CARD = 1
+
+    def describe(self):
+        return self.name, self.value
+
 
 # Flags storing information about player
-PLAYER_FLAGS = {
-    "is_AI_controlled": True,
-    "is_active": True,  # means that player didn't fold
-    "is_player_turn": False
+class PlayerFlags:
+    def __init__(self, AI_controlled=True, active=True, player_turn=False):
+        self.is_AI_controlled = AI_controlled
+        self.is_active = active
+        self.is_player_turn = player_turn
+
+
+CARD_NAMES = {
+    11: "Jack",
+    12: "Queen",
+    13: "King",
+    14: "Ace",
 }
 
 STARTING_MONEY = 1000
 
 GAME_STAGES = ["replace", "bet", "flop", "bet", "turn", "bet", "river", "bet", "result"]
 
-ASSETS = Path("assets/")
+ASSETS = pathlib.Path("assets/")
 
 # Colors
-ORANGE = (248, 152, 56)
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
+BUTTON_COLOR = (248, 152, 56)
+FONT_COLOR = (0, 0, 0)
+INPUT_COLOR = (255, 255, 255)
 
 FONT_SIZE = 20
 
@@ -48,6 +60,8 @@ CARD_DOWNSCALE_HEIGHT = 122
 FIRST_HAND_CARD_X = 503
 SECOND_HAND_CARD_X = 632
 HAND_CARDS_Y = 528
+
+CARD_CLICK_OFFSET = 15
 
 BOTS_POSITION = [(1100, 440),  # BOT_1
                  (910, 190),   # BOT_2
@@ -73,13 +87,13 @@ CHIPS_POSITION = [(390, 535),  # Player's chip
                   (285, 475)]  # Bot_4's chip
 
 # Text
-INFO = (625, 235)
+INFO_POSITION = (625, 235)
 
-PLAYER_NAME = (880, 555)
-PLAYER_MONEY = (880, 595)
+PLAYER_NAME_POSITION = (880, 555)
+PLAYER_MONEY_POSITION = (880, 595)
 
-ROUND_POT = (WINDOW_WIDTH / 2, 150)
-GAME_POT = (WINDOW_WIDTH / 2, 120)
+ROUND_POT_POSITION = (WINDOW_WIDTH / 2, 150)
+GAME_POT_POSITION = (WINDOW_WIDTH / 2, 120)
 
 TEXT_LIST_LEN = 9
 

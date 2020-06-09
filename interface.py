@@ -15,7 +15,7 @@ class GameObject:
 
     def render_text(self, text):
         """Renders Pygame text object with given text value."""
-        return self.font.render(text, True, const.BLACK)
+        return self.font.render(text, True, const.FONT_COLOR)
 
     def update_text(self, new_text):
         """Updates text value and invokes render_text method."""
@@ -33,7 +33,7 @@ class GameObject:
 
 class Text(GameObject):
     """Represents text object."""
-    def __init__(self, text, font, position=const.INFO, rect=None):
+    def __init__(self, text, font, position=const.INFO_POSITION, rect=None):
         super().__init__(rect, text, font)
         self.text_rect.center = position
 
@@ -41,9 +41,9 @@ class Text(GameObject):
 class Button(GameObject):
     """Represents button with position, centered caption, color and border."""
     def __init__(self, rect, text, font,
-                 bg_color=const.ORANGE,
+                 bg_color=const.BUTTON_COLOR,
                  border_size=const.BORDER_SIZE,
-                 border_color=const.BLACK):
+                 border_color=const.FONT_COLOR):
 
         super().__init__(rect, text, font)
         self.text_rect.center = (self.rect.x + self.rect.width / 2, self.rect.y + self.rect.height / 2)
@@ -68,13 +68,13 @@ class Chip(GameObject):
 
 def text_init(game):
     """Initializes texts: round and game pot, name and money for every player."""
-    game_info = Text(game.info, game.font, const.INFO)
+    game_info = Text(game.info, game.font, const.INFO_POSITION)
 
-    player_name = Text(game.main_player.name, game.font, const.PLAYER_NAME)
-    player_money = Text("${}".format(game.main_player.money), game.font, const.PLAYER_MONEY)
+    player_name = Text(game.main_player.name, game.font, const.PLAYER_NAME_POSITION)
+    player_money = Text("${}".format(game.main_player.money), game.font, const.PLAYER_MONEY_POSITION)
 
-    round_pot = Text("Round pot: ${}".format(game.round_pot), game.font, const.ROUND_POT)
-    game_pot = Text("Game pot: ${}".format(game.game_pot), game.font, const.GAME_POT)
+    round_pot = Text("Round pot: ${}".format(game.round_pot), game.font, const.ROUND_POT_POSITION)
+    game_pot = Text("Game pot: ${}".format(game.game_pot), game.font, const.GAME_POT_POSITION)
 
     text_list = [player_name, player_money, round_pot, game_pot, game_info]
 
@@ -86,11 +86,11 @@ def text_init(game):
 
 def buttons_init(game):
     """Initializes raise, call, fold and input buttons."""
-    raise_button = Button(pygame.Rect(const.RAISE), "Raise", game.font, const.ORANGE)
-    call_button = Button(pygame.Rect(const.CALL), "Call|Wait", game.font, const.ORANGE)
-    fold_button = Button(pygame.Rect(const.FOLD), "Fold", game.font, const.ORANGE)
+    raise_button = Button(pygame.Rect(const.RAISE), "Raise", game.font, const.BUTTON_COLOR)
+    call_button = Button(pygame.Rect(const.CALL), "Call|Wait", game.font, const.BUTTON_COLOR)
+    fold_button = Button(pygame.Rect(const.FOLD), "Fold", game.font, const.BUTTON_COLOR)
 
-    input_box = Button(pygame.Rect(const.INPUT_BOX), "", game.font, const.WHITE)
+    input_box = Button(pygame.Rect(const.INPUT_BOX), "", game.font, const.INPUT_COLOR)
 
     return raise_button, call_button, fold_button, input_box
 
@@ -108,7 +108,7 @@ def clear_stage(game_pot, round_pot, chip_list, text_list):
 
 
 def update_info(info, font, screen):
-    text = Text(info, font, const.INFO)
+    text = Text(info, font, const.INFO_POSITION)
     screen.blit(text.rendered_text, text.text_rect)
 
 #def update_money(text_list, player):

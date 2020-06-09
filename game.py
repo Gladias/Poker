@@ -56,7 +56,7 @@ class Game:
         active_players = self.active_players()
 
         # List of format [false, false, false, true, false]
-        players_turns = [player.flags["is_player_turn"] for player in active_players]
+        players_turns = [player.flags.is_player_turn for player in active_players]
 
         if players_turns[-1]:  # If it's last player's turn, set turn to first player
             players_turns.reverse()
@@ -67,7 +67,7 @@ class Game:
 
         # Assign new turn value to each player
         for index, _ in enumerate(players_turns):
-            active_players[index].flags["is_player_turn"] = players_turns[index]
+            active_players[index].flags.is_player_turn = players_turns[index]
 
     def previous_player(self, player):
         """Returns previous player to given player."""
@@ -138,7 +138,7 @@ class Game:
         """Sets player's is_active flag to false."""
         if player.is_active:
             self.next_player_turn()
-            player.flags["is_active"] = False
+            player.flags.is_active = False
 
             self.info = "{} folds".format(player.name)
         else:
@@ -194,16 +194,16 @@ class Game:
         card_2 = bot.card_2
 
         sets_counter = {
-            "ROYAL FLUSH": 0,
-            "STRAIGHT FLUSH": 0,
-            "FOUR OF A KIND": 0,
-            "FULL HOUSE": 0,
+            "ROYAL_FLUSH": 0,
+            "STRAIGHT_FLUSH": 0,
+            "FOUR_OF_A_KIND": 0,
+            "FULL_HOUSE": 0,
             "FLUSH": 0,
             "STRAIGHT": 0,
-            "THREE OF A KIND": 0,
-            "TWO PAIRS": 0,
-            "ONE PAIR": 0,
-            "HIGH CARD": 0
+            "THREE_OF_A_KIND": 0,
+            "TWO_PAIRS": 0,
+            "ONE_PAIR": 0,
+            "HIGH_CARD": 0
         }
 
         arr = [copy.deepcopy(sets_counter) for _ in range(4)]
@@ -213,7 +213,8 @@ class Game:
         for _ in range(N):
             simulation_deck.shuffle()
             table_cards = [simulation_deck.deck[i] for i in range(5)]
-
+            table_cards.append(bot.card_1)
+            table_cards.append(bot.card_2)
             hand_evaluation.hands_combinations(table_cards, bot)
             arr[0][bot.card_set[0]] += 1
 
@@ -224,7 +225,8 @@ class Game:
         for _ in range(N):
             simulation_deck.shuffle()
             table_cards = [simulation_deck.deck[i] for i in range(5)]
-
+            table_cards.append(bot.card_1)
+            table_cards.append(bot.card_2)
             hand_evaluation.hands_combinations(table_cards, bot)
             arr[1][bot.card_set[0]] += 1
 
@@ -238,7 +240,8 @@ class Game:
         for _ in range(N):
             simulation_deck.shuffle()
             table_cards = [simulation_deck.deck[i] for i in range(5)]
-
+            table_cards.append(bot.card_1)
+            table_cards.append(bot.card_2)
             hand_evaluation.hands_combinations(table_cards, bot)
             arr[2][bot.card_set[0]] += 1
 
@@ -253,7 +256,8 @@ class Game:
         for _ in range(N):
             simulation_deck.shuffle()
             table_cards = [simulation_deck.deck[i] for i in range(5)]
-
+            table_cards.append(bot.card_1)
+            table_cards.append(bot.card_2)
             hand_evaluation.hands_combinations(table_cards, bot)
             arr[3][bot.card_set[0]] += 1
 
@@ -267,11 +271,13 @@ class Game:
         rows_values = [0, 0, 0, 0]
 
         for i, _ in enumerate(arr):  # 4
-            for j, _ in enumerate(sets_counter):  # 9
-                arr[i][const.SETS_AND_VALUES[j][0]] *= const.SETS_AND_VALUES[j][1]
-                rows_values[i] += arr[i][const.SETS_AND_VALUES[j][0]]
+            for key, value in sets_counter.items():
+                arr[i][key] *= const.SetsAndValues[key].value
+                rows_values[i] += arr[i][key]
 
         best_variant = rows_values.index(max(rows_values))
+
+        print(rows_values)
 
         if best_variant == 0:
             self.info = "{} doesn't exchange any cards.".format(bot.name)
@@ -345,16 +351,16 @@ class Game:
         simulation_deck.generate()
 
         sets_counter = {
-            "ROYAL FLUSH": 0,
-            "STRAIGHT FLUSH": 0,
-            "FOUR OF A KIND": 0,
-            "FULL HOUSE": 0,
+            "ROYAL_FLUSH": 0,
+            "STRAIGHT_FLUSH": 0,
+            "FOUR_OF_A_KIND": 0,
+            "FULL_HOUSE": 0,
             "FLUSH": 0,
             "STRAIGHT": 0,
-            "THREE OF A KIND": 0,
-            "TWO PAIRS": 0,
-            "ONE PAIR": 0,
-            "HIGH CARD": 0
+            "THREE_OF_A_KIND": 0,
+            "TWO_PAIRS": 0,
+            "ONE_PAIR": 0,
+            "HIGH_CARD": 0
         }
 
         t_start = timeit.default_timer()
@@ -371,8 +377,10 @@ class Game:
 
         # Multiply sets by their value defined in const.py
 
-        for i in range(len(sets_counter)):
-            sets_counter[const.SETS_AND_VALUES[i][0]] *= const.SETS_AND_VALUES[i][1]
+        for key, value in sets_counter.items():
+            value *= const.SetsAndValues[key].value
+
+        print(sets_counter)
 
         simulation_value = sum(sets_counter.values())
 
@@ -526,7 +534,7 @@ class Game:
         bet_input = ""
 
         self.main_player.set_cards_position()
-        self.main_player.flags["is_player_turn"] = True
+        self.main_player.flags.is_player_turn = True
 
         self.screen.blit(background, (0, 0))
 
@@ -561,9 +569,9 @@ class Game:
                         pygame.display.flip()
 
                         # Run bet simulation for bots
-                        if not self.main_player.flags["is_player_turn"]:
+                        if not self.main_player.flags.is_player_turn:
                             for bot in self.bots:
-                                if bot.flags["is_active"]:
+                                if bot.flags.is_active:
                                     self.bet_simulation(bot, chip_list)
                                     text_list = interface.text_init(self)
                                     interface.update_screen(button_list, card_list, text_list,

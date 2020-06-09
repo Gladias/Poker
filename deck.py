@@ -20,11 +20,11 @@ class Deck:
         self.deck = []
 
     def __str__(self):
-        deck_str = ""
-        for i, card_object in enumerate(self.deck):
-            deck_str += "{}. {}\n".format(i + 1, card_object)
+        deck = []
+        for i, card_object in enumerate(self.deck, 1):
+            deck.append("{}. {}\n".format(i, card_object))
 
-        return deck_str
+        return "\n".join(deck)
 
     def generate(self):
         """Generates sorted deck."""

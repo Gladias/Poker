@@ -17,8 +17,7 @@ class Player:
         self.card_1 = deck.draw()
         self.card_2 = deck.draw()
         self.money = const.STARTING_MONEY
-        self.flags = copy.deepcopy(const.PLAYER_FLAGS)
-        self.flags["is_AI_controlled"] = is_AI_controlled
+        self.flags = const.PlayerFlags(is_AI_controlled)
         self.position = position
         self.bet_size = 0
         self.card_set = ()
@@ -44,7 +43,7 @@ class Player:
             print("Card replacement error")
 
     def is_active(self):
-        return self.flags["is_active"]
+        return self.flags.is_active
 
     def is_player_turn(self):
-        return self.flags["is_player_turn"]
+        return self.flags.is_player_turn
