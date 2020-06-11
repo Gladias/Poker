@@ -13,9 +13,9 @@ class GameObject:
         self.rendered_text = self.render_text(text)
         self.text_rect = self.rendered_text.get_rect()
 
-    def render_text(self, text):
+    def render_text(self, text, color=const.FONT_COLOR):
         """Renders Pygame text object with given text value."""
-        return self.font.render(text, True, const.FONT_COLOR)
+        return self.font.render(text, True, color)
 
     def update_text(self, new_text):
         """Updates text value and invokes render_text method."""
@@ -72,13 +72,14 @@ def text_init(game):
 
     player_name = Text(game.main_player.name, game.font, const.PLAYER_NAME_POSITION)
     player_money = Text("${}".format(game.main_player.money), game.font, const.PLAYER_MONEY_POSITION)
+    input_info = Text("Enter bet size ->", game.font, const.INPUT_INFO_POSITION)
+    input_info.rendered_text = input_info.render_text(input_info.text, const.BUTTON_COLOR)
 
     round_pot = Text("Round pot: ${}".format(game.round_pot), game.font, const.ROUND_POT_POSITION)
     game_pot = Text("Game pot: ${}".format(game.game_pot), game.font, const.GAME_POT_POSITION)
 
-    text_list = [player_name, player_money, round_pot, game_pot]
+    text_list = [player_name, player_money, round_pot, game_pot, input_info]
 
-    # print(len(game.bots))
     for index, bot in enumerate(game.bots):
         text_list.append(Text("{}    ${}".format(bot.name, bot.money), game.font, const.BOTS_POSITION[index]))
 
@@ -112,11 +113,9 @@ def update_info(info, font, screen):
     text = Text(info, font, const.INFO_POSITION)
     screen.blit(text.rendered_text, text.text_rect)
 
-#def update_money(text_list, player):
-  #  for text in text_list:
-  #      if player.name in text.text:
- #           text.update_text("")
 
+def player_turn_info(font, screen):
+    return Text("It's your turn", font, const.TURN_INFO_POSITION)
 
 
 def update_screen(button_list, card_list, text_list, chip_list, background, screen):

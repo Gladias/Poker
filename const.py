@@ -25,7 +25,6 @@ class PlayerFlags:
         self.is_active = active
         self.is_player_turn = player_turn
         self.is_bankrupt = bankrupt
-        # TODO: allin
 
 
 CARD_NAMES = {
@@ -67,7 +66,7 @@ CARD_CLICK_OFFSET = 15
 
 BOTS_POSITION = [(1100, 440),  # BOT_1
                  (910, 190),   # BOT_2
-                 (350, 190),   # BOT_3
+                 (360, 190),   # BOT_3
                  (170, 440)]   # BOT_4
 
 # Table cards
@@ -90,9 +89,12 @@ CHIPS_POSITION = [(440, 525),  # Player's chip
 
 # Text
 INFO_POSITION = (625, 235)
+TURN_INFO_POSITION = (625, 265)
 
-PLAYER_NAME_POSITION = (880, 555)
-PLAYER_MONEY_POSITION = (880, 595)
+PLAYER_NAME_POSITION = (870, 540)
+PLAYER_MONEY_POSITION = (870, 575)
+
+INPUT_INFO_POSITION = (1015, 610)
 
 ROUND_POT_POSITION = (WINDOW_WIDTH / 2, 150)
 GAME_POT_POSITION = (WINDOW_WIDTH / 2, 120)
@@ -103,10 +105,10 @@ TEXT_LIST_LEN = 9
 CONTINUE = (WINDOW_WIDTH / 2 - 70, WINDOW_HEIGHT / 2 + 80, 120, 40)
 
 FOLD = (825, 645, 100, 40)
-CALL = (975, 645, 100, 40)
+CALL = (975, 645, 115, 40)
 RAISE = (1125, 645, 100, 40)
 
-INPUT_BOX = (1085, 545, 140, 50)
+INPUT_BOX = (1125, 590, 100, 40)
 
 BUTTON_LIST_LEN = 4
 
