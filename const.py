@@ -20,10 +20,12 @@ class SetsAndValues(enum.Enum):
 
 # Flags storing information about player
 class PlayerFlags:
-    def __init__(self, AI_controlled=True, active=True, player_turn=False):
+    def __init__(self, AI_controlled=True, active=True, player_turn=False, bankrupt=False):
         self.is_AI_controlled = AI_controlled
         self.is_active = active
         self.is_player_turn = player_turn
+        self.is_bankrupt = bankrupt
+        # TODO: allin
 
 
 CARD_NAMES = {
@@ -80,10 +82,10 @@ CHIP_HEIGHT = 24
 
 CHIP_CAPTION = (12, 12)
 
-CHIPS_POSITION = [(390, 535),  # Player's chip
+CHIPS_POSITION = [(440, 525),  # Player's chip
                   (970, 475),  # Bot_1's chip
-                  (820, 225),  # Bot_2's chip
-                  (410, 225),  # Bot_3's chip
+                  (805, 235),  # Bot_2's chip
+                  (410, 240),  # Bot_3's chip
                   (285, 475)]  # Bot_4's chip
 
 # Text

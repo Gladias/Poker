@@ -76,8 +76,9 @@ def text_init(game):
     round_pot = Text("Round pot: ${}".format(game.round_pot), game.font, const.ROUND_POT_POSITION)
     game_pot = Text("Game pot: ${}".format(game.game_pot), game.font, const.GAME_POT_POSITION)
 
-    text_list = [player_name, player_money, round_pot, game_pot, game_info]
+    text_list = [player_name, player_money, round_pot, game_pot]
 
+    # print(len(game.bots))
     for index, bot in enumerate(game.bots):
         text_list.append(Text("{}    ${}".format(bot.name, bot.money), game.font, const.BOTS_POSITION[index]))
 
@@ -98,13 +99,13 @@ def buttons_init(game):
 def clear_stage(game_pot, round_pot, chip_list, text_list):
     """Clears chip_list and updates game and round pot display."""
     chip_list.clear()
-    text_list.pop()
+    # text_list.pop()
 
     for obj in text_list:
         if "Round" in obj.text:
-            obj.update_text(str(round_pot))
+            obj.update_text(str("Round pot: ${}".format(round_pot)))
         elif "Game" in obj.text:
-            obj.update_text(str(game_pot))
+            obj.update_text(str("Game pot: ${}".format(game_pot)))
 
 
 def update_info(info, font, screen):

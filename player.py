@@ -47,3 +47,6 @@ class Player:
 
     def is_player_turn(self):
         return self.flags.is_player_turn
+
+    def is_bankrupt(self):
+        return self.flags.is_bankrupt
