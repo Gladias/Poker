@@ -280,7 +280,7 @@ class Game:
         rows_values = [0, 0, 0, 0]
 
         for i, _ in enumerate(arr):  # 4
-            for key, value in sets_counter.items():
+            for key, _ in sets_counter.items():
                 arr[i][key] *= const.SetsAndValues[key].value
                 rows_values[i] += arr[i][key]
 
@@ -303,9 +303,6 @@ class Game:
         print("Bot made a decision in {:.2f}s|".format(t_end - t_start))
 
     def bet(self, event, active_players, fold_button, call_button, raise_button, chip_list, bet_input):
-        if not active_players:
-            pass  # TODO: new game
-
         if event.type == pygame.MOUSEBUTTONUP and self.main_player.is_player_turn:
             if fold_button.rect.collidepoint(event.pos):
                 self.fold(self.main_player)
@@ -353,8 +350,8 @@ class Game:
         simulation_deck.remove(bot.card_1)
         simulation_deck.remove(bot.card_2)
 
-        for card in self.table:
-            simulation_deck.remove(card)
+        for game_card in self.table:
+            simulation_deck.remove(game_card)
 
         sets_counter = {
             "ROYAL_FLUSH": 0,
@@ -542,7 +539,7 @@ class Game:
         all_players = [self.main_player] + self.bots
         # all_players.append(self.main_player)
 
-        for index, player in enumerate(all_players):
+        for player in all_players:
             player.bet_size = 0
             if player.money == 0:
                 player.flags.is_bankrupt = True
