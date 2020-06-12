@@ -30,7 +30,6 @@ class TestDeck(unittest.TestCase):
 
         self.assertEqual(len(self.deck.deck), begin_len + 1)
         self.assertEqual(self.deck.deck[-1], test_card)
-        self.deck.deck.pop()
 
     def test_draw(self):
         begin_len = len(self.deck.deck)
