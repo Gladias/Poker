@@ -16,7 +16,7 @@ def main():
     game_deck.shuffle()
 
     # Player with AI=False is main player and can occur only once in list of players
-    alex = player.Player(name="Alex", deck=game_deck, position=0, is_AI_controlled=False)
+    alex = player.Player(name="Player", deck=game_deck, position=0, is_AI_controlled=False)
     bot_1 = player.Player(name="Bot_1", deck=game_deck, position=1)
     bot_2 = player.Player(name="Bot_2", deck=game_deck, position=2)
     bot_3 = player.Player(name="Bot_3", deck=game_deck, position=3)

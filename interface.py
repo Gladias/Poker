@@ -114,8 +114,8 @@ def update_info(info, font, screen):
     screen.blit(text.rendered_text, text.text_rect)
 
 
-def player_turn_info(font, screen):
-    return Text("It's your turn", font, const.TURN_INFO_POSITION)
+def player_turn_info(message, font, screen):
+    return Text(message, font, const.TURN_INFO_POSITION)
 
 
 def update_screen(button_list, card_list, text_list, chip_list, background, screen):

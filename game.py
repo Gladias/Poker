@@ -5,6 +5,7 @@ import timeit
 
 import pygame
 
+import card
 import deck
 import const
 import interface
@@ -184,7 +185,7 @@ class Game:
     def replace_simulation(self, bot, game_deck):
         """Decide which cards to exchange in AI controlled players"""
         t_start = timeit.default_timer()
-        N = 5000
+        N = 4000
         # Number of simulations per case, there are 4 cases because player can do 1 action from 4 available:
         # 1. Don't exchange cards
         # 2. Replace first card
@@ -395,6 +396,10 @@ class Game:
 
         money_left = bot.money + bot.bet_size - previous_bet_size
 
+        # Additional case when previous_bet_size - bot.bet_size is very low,
+        # bot should risk and call.
+        risk_cap = int(const.STARTING_MONEY / const.RISK_CAP_PERCENTAGE)
+
         if simulation_value >= 3.5 and not bot.bet_size:
             # Bot raises
 
@@ -413,7 +418,7 @@ class Game:
                 bet_size = int(low_raise * money_left) + previous_bet_size
                 self.raise_pot(bot, bet_size, chip_list)
 
-        elif 2.5 < simulation_value < 3.5:
+        elif 2.5 < simulation_value < 3.5 or previous_bet_size - bot.bet_size <= risk_cap:
             # Bot calls or waits
             if can_bot_wait:
                 self.wait(bot)
@@ -432,7 +437,7 @@ class Game:
 
         # Removes bot's instant moves
         if elapsed_time < 2:
-            time.sleep(2)
+            time.sleep(int(2 - elapsed_time))
 
         print("Bet simulation {:.2f}s".format(elapsed_time))
 
@@ -542,7 +547,11 @@ class Game:
             if player.money == 0:
                 player.flags.is_bankrupt = True
                 player.flags.is_active = False
-            if not player.is_bankrupt():
+                if player.name == self.main_player.name:
+                    self.main_player.card_1 = card.Card(0, "Bankrupt", str(const.ASSETS / "card_reverse.png"))
+                    self.main_player.card_2 = card.Card(0, "Bankrupt", str(const.ASSETS / "card_reverse.png"))
+
+            else:
                 player.flags.is_active = True
                 player.flags.is_player_turn = False
                 player.card_1 = self.game_deck.draw()
@@ -560,6 +569,7 @@ class Game:
         active_players = self.active_players()
         active_players[0].flags.is_player_turn = True
 
+        self.main_player.flags.replaced_cards = False
         self.main_player.set_cards_position()
 
         return card_list, raise_button, call_button, fold_button, input_box, \
@@ -604,7 +614,6 @@ class Game:
                 if stage == "bet":
                     active_players = self.active_players()
 
-
                     if active_players[0].bet_size == active_players[-1].bet_size \
                             and self.main_player.bet_size > 0:
                         stage = next(self.stages)
@@ -626,6 +635,10 @@ class Game:
                                     # Bot doesn't have enough money
                                     if self.previous_player(bot).bet_size > bot.money + bot.bet_size:
                                         self.fold(bot)
+                                        time.sleep(2)
+                                    elif self.previous_player(bot).bet_size == bot.money == 0:
+                                        self.wait(bot)
+                                        time.sleep(2)
                                     else:
                                         self.bet_simulation(bot, chip_list)
                                     text_list = interface.text_init(self)
@@ -640,19 +653,23 @@ class Game:
                                 stage = next(self.stages)
 
                 elif stage == "replace":
-                    self.info = "{} click on cards you would like to replace".format(self.main_player.name)
-                    interface.update_info(self.info, self.font, self.screen)
-                    # Replace method returns True if player clicked continue button
-                    if self.replace(event, button_list):
-                        card_list = [self.main_player.card_1, self.main_player.card_2]
-                        text_list.pop()
+                    if not self.main_player.is_bankrupt():
+                        self.info = "Click on cards you would like to replace".format(self.main_player.name)
+                        interface.update_info(self.info, self.font, self.screen)
+                        # Replace method returns True if player clicked continue button
+                        if self.replace(event, button_list):
+                            card_list = [self.main_player.card_1, self.main_player.card_2]
+                            text_list.pop()
+                            self.main_player.flags.replaced_cards = True
+                    if self.main_player.is_bankrupt() or self.main_player.flags.replaced_cards:
                         # Run replacement simulation for bots
                         for bot in self.bots:
-                            self.replace_simulation(bot, self.game_deck)
-                            interface.update_screen(button_list, card_list, text_list, chip_list,
-                                                    background, self.screen)
-                            interface.update_info(self.info, self.font, self.screen)
-                            pygame.display.flip()
+                            if bot.is_active():
+                                self.replace_simulation(bot, self.game_deck)
+                                interface.update_screen(button_list, card_list, text_list, chip_list,
+                                                        background, self.screen)
+                                interface.update_info(self.info, self.font, self.screen)
+                                pygame.display.flip()
                         stage = next(self.stages)
 
                 elif stage == "flop":
@@ -698,10 +715,15 @@ class Game:
 
                 if self.main_player.is_player_turn():
                     if len(text_list) == const.TEXT_LIST_LEN:
-                        text_list.append(interface.player_turn_info(self.font, self.screen))
+                        text_list.append(interface.player_turn_info("It's your turn", self.font, self.screen))
                 else:
                     if len(text_list) > const.TEXT_LIST_LEN:
                         text_list.pop()
+
+                if self.main_player.is_bankrupt():
+                    if len(text_list) == const.TEXT_LIST_LEN:
+                        text_list.append(interface.player_turn_info("Bots make moves after mouse click",
+                                                                    self.font, self.screen))
 
                 interface.update_screen(button_list, card_list, text_list, chip_list, background, self.screen)
                 interface.update_info(self.info, self.font, self.screen)

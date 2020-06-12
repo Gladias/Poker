@@ -25,6 +25,7 @@ class PlayerFlags:
         self.is_active = active
         self.is_player_turn = player_turn
         self.is_bankrupt = bankrupt
+        self.replaced_cards = False
 
 
 CARD_NAMES = {
@@ -35,6 +36,7 @@ CARD_NAMES = {
 }
 
 STARTING_MONEY = 1000
+RISK_CAP_PERCENTAGE = 15
 
 GAME_STAGES = ["replace", "bet", "flop", "bet", "turn", "bet", "river", "bet", "result"]
 
